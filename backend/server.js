@@ -21,8 +21,8 @@ app.get("/", (req, res) => {
   res.json({ message: "SCM Backend API is running successfully 🚀" });
 });
 
-// ---- Routes will be added here as we build each module ----
-// Example (Phase 2): app.use("/api/auth", require("./routes/authRoutes"));
+// ---- Routes ----
+app.use("/api/auth", require("./routes/authRoutes"));
 
 const PORT = process.env.PORT || 5000;
 
