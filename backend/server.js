@@ -12,7 +12,9 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(cors());                       // Allow frontend (different port) to call this API
+app.use(cors({
+  origin: "*"
+}));                      // Allow frontend (different port) to call this API
 app.use(express.json());               // Parse JSON request bodies
 app.use(morgan("dev"));                // Log incoming requests to console
 
@@ -30,6 +32,7 @@ app.use("/api/purchase-orders", require("./routes/purchaseOrderRoutes"));
 app.use("/api/orders", require("./routes/orderRoutes"));
 app.use("/api/analytics", require("./routes/analyticsRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
+app.use("/api/inventory-transactions", require("./routes/inventoryTransactionRoutes"));
 
 const PORT = process.env.PORT || 5000;
 

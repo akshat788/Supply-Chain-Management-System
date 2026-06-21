@@ -10,8 +10,15 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Make tables scrollable on mobile */
+.MuiTableContainer-root {
+  overflow-x: auto !important;
+}
+
+/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -21,4 +28,24 @@ body {
 ::-webkit-scrollbar-thumb {
   background: #c1c1c1;
   border-radius: 3px;
+}
+
+/* Mobile-friendly tap targets */
+@media (max-width: 600px) {
+  .MuiButton-root {
+    min-height: 44px;
+  }
+
+  .MuiTableCell-root {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
+
+  .MuiChip-root {
+    font-size: 11px !important;
+  }
+
+  .MuiCardContent-root {
+    padding: 16px !important;
+  }
 }

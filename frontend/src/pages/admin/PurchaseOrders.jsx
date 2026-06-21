@@ -6,15 +6,19 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead,
   TableRow, Paper, Chip, Dialog, DialogTitle, DialogContent,
   DialogActions, Alert, CircularProgress, MenuItem, Select,
-  FormControl, InputLabel, IconButton,
+  FormControl, InputLabel, IconButton, Stepper, Step,
+  StepLabel, Grid,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 
 const statusColors = {
   Pending: "warning", Confirmed: "info", Shipped: "primary",
   Delivered: "success", Cancelled: "error",
 };
+
+const statusSteps = ["Pending", "Confirmed", "Shipped", "Delivered"];
 
 const PurchaseOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -25,6 +29,7 @@ const PurchaseOrders = () => {
   const [success, setSuccess] = useState("");
   const [open, setOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
+  const [viewOpen, setViewOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [newStatus, setNewStatus] = useState("");
   const [form, setForm] = useState({
@@ -39,16 +44,9 @@ const PurchaseOrders = () => {
         API.get("/suppliers"),
         API.get("/products"),
       ]);
-      console.log("PO RESPONSE:", poRes);
-      console.log("PO DATA:", poRes.data);
-      console.log("SUPPLIERS RESPONSE:", supRes);
-      console.log("SUPPLIERS DATA:", supRes.data);
-      console.log("SUPPLIERS DATA.DATA:", supRes.data.suppliers);
-      console.log("PRODUCTS RESPONSE:", prodRes);
-      console.log("PRODUCTS DATA:", prodRes.data);
-      setOrders(poRes.data.orders || []);
-      setSuppliers(supRes.data.suppliers || []);
-      setProducts(prodRes.data.products || []);
+      setOrders(poRes.data.orders);
+      setSuppliers(supRes.data.suppliers);
+      setProducts(prodRes.data.products);
     } catch {
       setError("Failed to load data.");
     } finally {
@@ -58,9 +56,7 @@ const PurchaseOrders = () => {
 
   useEffect(() => { fetchData(); }, []);
 
-  const addItem = () => {
-    setForm({ ...form, items: [...form.items, { product: "", quantity: 1, unitPrice: 0 }] });
-  };
+  const addItem = () => setForm({ ...form, items: [...form.items, { product: "", quantity: 1, unitPrice: 0 }] });
 
   const updateItem = (index, field, value) => {
     const items = [...form.items];
@@ -91,6 +87,23 @@ const PurchaseOrders = () => {
     }
   };
 
+  const getActiveStep = (status) => {
+    const index = statusSteps.indexOf(status);
+    return index === -1 ? 0 : index;
+  };
+
+  const getDeliveryDelay = (order) => {
+    if (!order.expectedDeliveryDate) return null;
+    const expected = new Date(order.expectedDeliveryDate);
+    const actual = order.deliveredDate ? new Date(order.deliveredDate) : new Date();
+    const diff = Math.floor((actual - expected) / (1000 * 60 * 60 * 24));
+    return diff;
+  };
+
+  const getSupplierForOrder = (order) => {
+    return suppliers.find(s => s._id === order.supplier?._id || s._id === order.supplier);
+  };
+
   return (
     <Layout>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
@@ -116,7 +129,7 @@ const PurchaseOrders = () => {
               <Table>
                 <TableHead sx={{ backgroundColor: "#f8f9fa" }}>
                   <TableRow>
-                    {["PO Number", "Supplier", "Items", "Total", "Status", "Expected Date", "Actions"].map((h) => (
+                    {["PO Number", "Supplier", "Contact", "Items", "Total", "Status", "Expected Date", "Actions"].map(h => (
                       <TableCell key={h} sx={{ fontWeight: 600, color: "#1a1a2e" }}>{h}</TableCell>
                     ))}
                   </TableRow>
@@ -124,31 +137,66 @@ const PurchaseOrders = () => {
                 <TableBody>
                   {orders.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} align="center" sx={{ py: 4, color: "text.secondary" }}>
+                      <TableCell colSpan={8} align="center" sx={{ py: 4, color: "text.secondary" }}>
                         No purchase orders yet.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    orders.map((o) => (
-                      <TableRow key={o._id} hover>
-                        <TableCell><Chip label={o.poNumber} size="small" /></TableCell>
-                        <TableCell>{o.supplier?.name}</TableCell>
-                        <TableCell>{o.items?.length} item(s)</TableCell>
-                        <TableCell>₹{o.totalAmount?.toLocaleString()}</TableCell>
-                        <TableCell>
-                          <Chip label={o.status} size="small" color={statusColors[o.status] || "default"} />
-                        </TableCell>
-                        <TableCell>
-                          {o.expectedDeliveryDate ? new Date(o.expectedDeliveryDate).toLocaleDateString() : "—"}
-                        </TableCell>
-                        <TableCell>
-                          <IconButton size="small" color="primary"
-                            onClick={() => { setSelectedOrder(o); setNewStatus(o.status); setStatusOpen(true); }}>
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    orders.map(o => {
+                      const supplier = getSupplierForOrder(o);
+                      const delay = getDeliveryDelay(o);
+                      return (
+                        <TableRow key={o._id} hover>
+                          <TableCell><Chip label={o.poNumber} size="small" /></TableCell>
+                          <TableCell>
+                            <Typography variant="body2" fontWeight={500}>{o.supplier?.name}</Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="caption" color="text.secondary">
+                              {supplier?.contactPerson || "—"}
+                            </Typography>
+                            <Typography variant="caption" display="block" color="text.secondary">
+                              {supplier?.phone || ""}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>{o.items?.length} item(s)</TableCell>
+                          <TableCell>₹{o.totalAmount?.toLocaleString()}</TableCell>
+                          <TableCell>
+                            <Chip label={o.status} size="small" color={statusColors[o.status] || "default"} />
+                            {o.status !== "Cancelled" && delay !== null && delay > 0 && o.status !== "Delivered" && (
+                              <Typography variant="caption" display="block" color="error">
+                                {delay}d overdue
+                              </Typography>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {o.expectedDeliveryDate ? (
+                              <Box>
+                                <Typography variant="caption">
+                                  Expected: {new Date(o.expectedDeliveryDate).toLocaleDateString()}
+                                </Typography>
+                                {o.deliveredDate && (
+                                  <Typography variant="caption" display="block" color={delay > 0 ? "error" : "success.main"}>
+                                    Actual: {new Date(o.deliveredDate).toLocaleDateString()}
+                                    {delay !== null && ` (${delay > 0 ? `+${delay}d delay` : "On time"})`}
+                                  </Typography>
+                                )}
+                              </Box>
+                            ) : "—"}
+                          </TableCell>
+                          <TableCell>
+                            <IconButton size="small" color="info"
+                              onClick={() => { setSelectedOrder(o); setViewOpen(true); }}>
+                              <VisibilityIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton size="small" color="primary"
+                              onClick={() => { setSelectedOrder(o); setNewStatus(o.status); setStatusOpen(true); }}>
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
@@ -157,52 +205,70 @@ const PurchaseOrders = () => {
         </CardContent>
       </Card>
 
-      {/* Create PO Dialog */}
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle fontWeight={600}>Create Purchase Order</DialogTitle>
+      {/* View PO Dialog with Stepper */}
+      <Dialog open={viewOpen} onClose={() => setViewOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle fontWeight={600}>Purchase Order Details</DialogTitle>
         <DialogContent>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-            <FormControl size="small" fullWidth>
-              <InputLabel>Supplier *</InputLabel>
-              <Select value={form.supplier} label="Supplier *"
-                onChange={(e) => setForm({ ...form, supplier: e.target.value })}>
-                {suppliers.map((s) => <MenuItem key={s._id} value={s._id}>{s.name}</MenuItem>)}
-              </Select>
-            </FormControl>
-            <Typography variant="caption" color="text.secondary">Expected Delivery Date</Typography>
-            <TextField size="small" fullWidth type="date"
-              InputLabelProps={{ shrink: true }}
-              value={form.expectedDeliveryDate}
-              onChange={(e) => setForm({ ...form, expectedDeliveryDate: e.target.value })} />
+          {selectedOrder && (
+            <Box>
+              {/* Delivery Progress Stepper */}
+              <Card sx={{ mb: 3, p: 2, backgroundColor: "#f8f9fa", borderRadius: 2 }} elevation={0}>
+                <Typography variant="subtitle2" fontWeight={600} mb={2}>Delivery Progress</Typography>
+                <Stepper activeStep={getActiveStep(selectedOrder.status)} alternativeLabel>
+                  {statusSteps.map(label => (
+                    <Step key={label}>
+                      <StepLabel>{label}</StepLabel>
+                    </Step>
+                  ))}
+                </Stepper>
+              </Card>
 
-            <Typography variant="subtitle2" fontWeight={600} mt={1}>Items</Typography>
-            {form.items.map((item, index) => (
-              <Box key={index} sx={{ display: "flex", gap: 2 }}>
-                <FormControl size="small" sx={{ flex: 2 }}>
-                  <InputLabel>Product</InputLabel>
-                  <Select value={item.product} label="Product"
-                    onChange={(e) => updateItem(index, "product", e.target.value)}>
-                    {products.map((p) => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
-                  </Select>
-                </FormControl>
-                <TextField label="Qty" size="small" type="number" sx={{ flex: 1 }}
-                  value={item.quantity} onChange={(e) => updateItem(index, "quantity", Number(e.target.value))} />
-                <TextField label="Unit Price" size="small" type="number" sx={{ flex: 1 }}
-                  value={item.unitPrice} onChange={(e) => updateItem(index, "unitPrice", Number(e.target.value))} />
-              </Box>
-            ))}
-            <Button onClick={addItem} size="small" sx={{ alignSelf: "flex-start" }}>+ Add Item</Button>
-
-            <TextField label="Notes" size="small" fullWidth multiline rows={2}
-              value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-          </Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle2" fontWeight={600} mb={1}>Order Info</Typography>
+                  {[
+                    { label: "PO Number", value: selectedOrder.poNumber },
+                    { label: "Status", value: selectedOrder.status },
+                    { label: "Total Amount", value: `₹${selectedOrder.totalAmount?.toLocaleString()}` },
+                    { label: "Expected Delivery", value: selectedOrder.expectedDeliveryDate ? new Date(selectedOrder.expectedDeliveryDate).toLocaleDateString() : "—" },
+                    { label: "Delivered On", value: selectedOrder.deliveredDate ? new Date(selectedOrder.deliveredDate).toLocaleDateString() : "Not yet" },
+                    { label: "Delay", value: (() => { const d = getDeliveryDelay(selectedOrder); if (d === null) return "—"; if (d <= 0) return "On time ✅"; return `${d} days late ⚠️`; })() },
+                  ].map(item => (
+                    <Box key={item.label} sx={{ display: "flex", justifyContent: "space-between", py: 0.5, borderBottom: "1px solid #f0f0f0" }}>
+                      <Typography variant="body2" color="text.secondary">{item.label}</Typography>
+                      <Typography variant="body2" fontWeight={500}>{item.value}</Typography>
+                    </Box>
+                  ))}
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle2" fontWeight={600} mb={1}>Supplier Info</Typography>
+                  {[
+                    { label: "Name", value: selectedOrder.supplier?.name },
+                    { label: "Code", value: selectedOrder.supplier?.supplierCode },
+                    { label: "Email", value: selectedOrder.supplier?.email || "—" },
+                    { label: "Phone", value: selectedOrder.supplier?.phone || "—" },
+                  ].map(item => (
+                    <Box key={item.label} sx={{ display: "flex", justifyContent: "space-between", py: 0.5, borderBottom: "1px solid #f0f0f0" }}>
+                      <Typography variant="body2" color="text.secondary">{item.label}</Typography>
+                      <Typography variant="body2" fontWeight={500}>{item.value}</Typography>
+                    </Box>
+                  ))}
+                  <Typography variant="subtitle2" fontWeight={600} mt={2} mb={1}>Items</Typography>
+                  {selectedOrder.items?.map((item, i) => (
+                    <Box key={i} sx={{ display: "flex", justifyContent: "space-between", py: 0.5, borderBottom: "1px solid #f0f0f0" }}>
+                      <Typography variant="body2">{item.product?.name || "Product"}</Typography>
+                      <Typography variant="body2" fontWeight={500}>
+                        {item.quantity} × ₹{item.unitPrice} = ₹{item.totalPrice?.toLocaleString()}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Grid>
+              </Grid>
+            </Box>
+          )}
         </DialogContent>
         <DialogActions sx={{ p: 3 }}>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleSubmit}
-            sx={{ backgroundColor: "#1a1a2e", "&:hover": { backgroundColor: "#0f3460" } }}>
-            Create Order
-          </Button>
+          <Button onClick={() => setViewOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
 
@@ -213,7 +279,7 @@ const PurchaseOrders = () => {
           <FormControl size="small" fullWidth sx={{ mt: 1 }}>
             <InputLabel>Status</InputLabel>
             <Select value={newStatus} label="Status" onChange={(e) => setNewStatus(e.target.value)}>
-              {["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"].map((s) => (
+              {["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"].map(s => (
                 <MenuItem key={s} value={s}>{s}</MenuItem>
               ))}
             </Select>
@@ -224,6 +290,53 @@ const PurchaseOrders = () => {
           <Button variant="contained" onClick={handleStatusUpdate}
             sx={{ backgroundColor: "#1a1a2e", "&:hover": { backgroundColor: "#0f3460" } }}>
             Update
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Create PO Dialog */}
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle fontWeight={600}>Create Purchase Order</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+            <FormControl size="small" fullWidth>
+              <InputLabel>Supplier *</InputLabel>
+              <Select value={form.supplier} label="Supplier *"
+                onChange={(e) => setForm({ ...form, supplier: e.target.value })}>
+                {suppliers.map(s => <MenuItem key={s._id} value={s._id}>{s.name} — {s.contactPerson}</MenuItem>)}
+              </Select>
+            </FormControl>
+            <Typography variant="caption" color="text.secondary">Expected Delivery Date</Typography>
+            <TextField size="small" fullWidth type="date"
+              InputLabelProps={{ shrink: true }}
+              value={form.expectedDeliveryDate}
+              onChange={(e) => setForm({ ...form, expectedDeliveryDate: e.target.value })} />
+            <Typography variant="subtitle2" fontWeight={600}>Items</Typography>
+            {form.items.map((item, index) => (
+              <Box key={index} sx={{ display: "flex", gap: 2 }}>
+                <FormControl size="small" sx={{ flex: 2 }}>
+                  <InputLabel>Product</InputLabel>
+                  <Select value={item.product} label="Product"
+                    onChange={(e) => updateItem(index, "product", e.target.value)}>
+                    {products.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+                <TextField label="Qty" size="small" type="number" sx={{ flex: 1 }}
+                  value={item.quantity} onChange={(e) => updateItem(index, "quantity", Number(e.target.value))} />
+                <TextField label="Unit Price" size="small" type="number" sx={{ flex: 1 }}
+                  value={item.unitPrice} onChange={(e) => updateItem(index, "unitPrice", Number(e.target.value))} />
+              </Box>
+            ))}
+            <Button onClick={addItem} size="small" sx={{ alignSelf: "flex-start" }}>+ Add Item</Button>
+            <TextField label="Notes" size="small" fullWidth multiline rows={2}
+              value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={() => setOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleSubmit}
+            sx={{ backgroundColor: "#1a1a2e", "&:hover": { backgroundColor: "#0f3460" } }}>
+            Create Order
           </Button>
         </DialogActions>
       </Dialog>

@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Unauthorized from "./pages/Unauthorized";
 
+// Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Suppliers from "./pages/admin/Suppliers";
 import Inventory from "./pages/admin/Inventory";
@@ -18,15 +19,19 @@ import Analytics from "./pages/admin/Analytics";
 import Users from "./pages/admin/Users";
 import SupplyChainTracking from "./pages/admin/SupplyChainTracking";
 
+// Supplier pages
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
 import SupplierProducts from "./pages/supplier/SupplierProducts";
 import SupplierPurchaseOrders from "./pages/supplier/SupplierPurchaseOrders";
 
+// Warehouse pages
 import WarehouseDashboard from "./pages/warehouse/WarehouseDashboard";
 import WarehouseInventory from "./pages/warehouse/WarehouseInventory";
 import WarehouseOrders from "./pages/warehouse/WarehouseOrders";
 import WarehousePurchaseOrders from "./pages/warehouse/WarehousePurchaseOrders";
+import InventoryTransactions from "./pages/warehouse/InventoryTransactions";
 
+// Retailer pages
 import RetailerDashboard from "./pages/retailer/RetailerDashboard";
 import RetailerOrders from "./pages/retailer/RetailerOrders";
 import RetailerProducts from "./pages/retailer/RetailerProducts";
@@ -41,6 +46,7 @@ function App() {
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
 
+          {/* Admin */}
           <Route path="/admin/dashboard" element={<PrivateRoute roles={["admin"]}><AdminDashboard /></PrivateRoute>} />
           <Route path="/admin/suppliers" element={<PrivateRoute roles={["admin"]}><Suppliers /></PrivateRoute>} />
           <Route path="/admin/products" element={<PrivateRoute roles={["admin"]}><Products /></PrivateRoute>} />
@@ -51,15 +57,19 @@ function App() {
           <Route path="/admin/users" element={<PrivateRoute roles={["admin"]}><Users /></PrivateRoute>} />
           <Route path="/admin/tracking" element={<PrivateRoute roles={["admin"]}><SupplyChainTracking /></PrivateRoute>} />
 
+          {/* Supplier */}
           <Route path="/supplier/dashboard" element={<PrivateRoute roles={["supplier"]}><SupplierDashboard /></PrivateRoute>} />
           <Route path="/supplier/products" element={<PrivateRoute roles={["supplier"]}><SupplierProducts /></PrivateRoute>} />
           <Route path="/supplier/purchase-orders" element={<PrivateRoute roles={["supplier"]}><SupplierPurchaseOrders /></PrivateRoute>} />
 
+          {/* Warehouse */}
           <Route path="/warehouse/dashboard" element={<PrivateRoute roles={["warehouse_manager"]}><WarehouseDashboard /></PrivateRoute>} />
           <Route path="/warehouse/inventory" element={<PrivateRoute roles={["warehouse_manager"]}><WarehouseInventory /></PrivateRoute>} />
           <Route path="/warehouse/orders" element={<PrivateRoute roles={["warehouse_manager"]}><WarehouseOrders /></PrivateRoute>} />
           <Route path="/warehouse/purchase-orders" element={<PrivateRoute roles={["warehouse_manager"]}><WarehousePurchaseOrders /></PrivateRoute>} />
+          <Route path="/warehouse/transactions" element={<PrivateRoute roles={["warehouse_manager"]}><InventoryTransactions /></PrivateRoute>} />
 
+          {/* Retailer */}
           <Route path="/retailer/dashboard" element={<PrivateRoute roles={["retailer"]}><RetailerDashboard /></PrivateRoute>} />
           <Route path="/retailer/products" element={<PrivateRoute roles={["retailer"]}><RetailerProducts /></PrivateRoute>} />
           <Route path="/retailer/orders" element={<PrivateRoute roles={["retailer"]}><RetailerOrders /></PrivateRoute>} />

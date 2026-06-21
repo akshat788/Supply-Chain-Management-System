@@ -7,14 +7,18 @@ import {
   Chip, Alert, CircularProgress, Dialog, DialogTitle,
   DialogContent, DialogActions, Button, TextField,
   FormControl, InputLabel, Select, MenuItem, IconButton,
+  Stepper, Step, StepLabel,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 const statusColors = {
   Pending: "warning", Confirmed: "info", Shipped: "primary",
   Delivered: "success", Cancelled: "error",
 };
+
+const statusSteps = ["Pending", "Confirmed", "Shipped", "Delivered"];
 
 const WarehousePurchaseOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -39,16 +43,9 @@ const WarehousePurchaseOrders = () => {
         API.get("/suppliers"),
         API.get("/products"),
       ]);
-      console.log("PO RESPONSE:", poRes);
-      console.log("PO DATA:", poRes.data);
-      console.log("SUPPLIERS RESPONSE:", supRes);
-      console.log("SUPPLIERS DATA:", supRes.data);
-      console.log("SUPPLIERS DATA.DATA:", supRes.data.suppliers);
-      console.log("PRODUCTS RESPONSE:", prodRes);
-      console.log("PRODUCTS DATA:", prodRes.data);
-      setOrders(poRes.data.orders || []);
-      setSuppliers(supRes.data.suppliers || []);
-      setProducts(prodRes.data.products || []);
+      setOrders(poRes.data.orders);
+      setSuppliers(supRes.data.suppliers);
+      setProducts(prodRes.data.products);
     } catch {
       setError("Failed to load data.");
     } finally {
@@ -68,40 +65,20 @@ const WarehousePurchaseOrders = () => {
 
   const handleSubmit = async () => {
     try {
-      console.log("SUBMIT CLICKED");
-      console.log("FORM DATA:", form);
-
-      const res = await API.post("/purchase-orders", form);
-
-      console.log("SUCCESS RESPONSE:", res.data);
-
+      await API.post("/purchase-orders", form);
       setSuccess("Purchase order created successfully!");
       setOpen(false);
-
-      setForm({
-        supplier: "",
-        expectedDeliveryDate: "",
-        notes: "",
-        items: [{ product: "", quantity: 1, unitPrice: 0 }]
-      });
-
+      setForm({ supplier: "", expectedDeliveryDate: "", notes: "", items: [{ product: "", quantity: 1, unitPrice: 0 }] });
       fetchData();
     } catch (err) {
-      console.log("ERROR RESPONSE:", err.response);
-      console.log("ERROR DATA:", err.response?.data);
-      console.log("FULL ERROR:", err);
-
-      setError(
-        err.response?.data?.message ||
-        "Failed to create purchase order."
-      );
+      setError(err.response?.data?.message || "Failed to create purchase order.");
     }
   };
 
-  const handleStatusUpdate = async () => {
+  const handleStatusUpdate = async (orderId, status) => {
     try {
-      await API.put(`/purchase-orders/${selectedOrder._id}/status`, { status: newStatus });
-      setSuccess(`Order marked as ${newStatus}`);
+      await API.put(`/purchase-orders/${orderId}/status`, { status });
+      setSuccess(`Order marked as ${status}`);
       setStatusOpen(false);
       fetchData();
     } catch (err) {
@@ -109,12 +86,17 @@ const WarehousePurchaseOrders = () => {
     }
   };
 
+  const getActiveStep = (status) => {
+    const index = statusSteps.indexOf(status);
+    return index === -1 ? 0 : index;
+  };
+
   return (
     <Layout>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
         <Box>
           <Typography variant="h5" fontWeight="bold" color="#1a1a2e">Purchase Orders</Typography>
-          <Typography variant="body2" color="text.secondary">Manage procurement from suppliers</Typography>
+          <Typography variant="body2" color="text.secondary">Manage procurement and receive shipments</Typography>
         </Box>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpen(true)}
           sx={{ backgroundColor: "#1a1a2e", "&:hover": { backgroundColor: "#0f3460" }, borderRadius: 2 }}>
@@ -134,7 +116,7 @@ const WarehousePurchaseOrders = () => {
               <Table>
                 <TableHead sx={{ backgroundColor: "#f8f9fa" }}>
                   <TableRow>
-                    {["PO Number", "Supplier", "Items", "Total", "Status", "Expected Date", "Actions"].map((h) => (
+                    {["PO Number", "Supplier", "Items", "Total", "Delivery Progress", "Status", "Actions"].map(h => (
                       <TableCell key={h} sx={{ fontWeight: 600, color: "#1a1a2e" }}>{h}</TableCell>
                     ))}
                   </TableRow>
@@ -147,23 +129,39 @@ const WarehousePurchaseOrders = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    orders.map((o) => (
+                    orders.map(o => (
                       <TableRow key={o._id} hover>
                         <TableCell><Chip label={o.poNumber} size="small" /></TableCell>
-                        <TableCell>{o.supplier?.name}</TableCell>
+                        <TableCell>
+                          <Typography variant="body2" fontWeight={500}>{o.supplier?.name}</Typography>
+                          <Typography variant="caption" color="text.secondary">{o.supplier?.phone || ""}</Typography>
+                        </TableCell>
                         <TableCell>{o.items?.length} item(s)</TableCell>
                         <TableCell>₹{o.totalAmount?.toLocaleString()}</TableCell>
+                        <TableCell sx={{ minWidth: 220 }}>
+                          <Stepper activeStep={getActiveStep(o.status)} alternativeLabel
+                            sx={{ "& .MuiStepLabel-label": { fontSize: 10 }, "& .MuiSvgIcon-root": { fontSize: 18 } }}>
+                            {statusSteps.map(label => (
+                              <Step key={label}><StepLabel>{label}</StepLabel></Step>
+                            ))}
+                          </Stepper>
+                        </TableCell>
                         <TableCell>
                           <Chip label={o.status} size="small" color={statusColors[o.status] || "default"} />
                         </TableCell>
                         <TableCell>
-                          {o.expectedDeliveryDate ? new Date(o.expectedDeliveryDate).toLocaleDateString() : "—"}
-                        </TableCell>
-                        <TableCell>
-                          <IconButton size="small" color="primary"
-                            onClick={() => { setSelectedOrder(o); setNewStatus(o.status); setStatusOpen(true); }}>
-                            <EditIcon fontSize="small" />
-                          </IconButton>
+                          {o.status === "Shipped" ? (
+                            <Button size="small" variant="contained" startIcon={<CheckCircleIcon />}
+                              onClick={() => handleStatusUpdate(o._id, "Delivered")}
+                              sx={{ backgroundColor: "#66bb6a", "&:hover": { backgroundColor: "#388e3c" }, fontSize: 11 }}>
+                              Receive
+                            </Button>
+                          ) : (
+                            <IconButton size="small" color="primary"
+                              onClick={() => { setSelectedOrder(o); setNewStatus(o.status); setStatusOpen(true); }}>
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))
@@ -175,6 +173,28 @@ const WarehousePurchaseOrders = () => {
         </CardContent>
       </Card>
 
+      {/* Update Status Dialog */}
+      <Dialog open={statusOpen} onClose={() => setStatusOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle fontWeight={600}>Update Order Status</DialogTitle>
+        <DialogContent>
+          <FormControl size="small" fullWidth sx={{ mt: 1 }}>
+            <InputLabel>Status</InputLabel>
+            <Select value={newStatus} label="Status" onChange={(e) => setNewStatus(e.target.value)}>
+              {["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"].map(s => (
+                <MenuItem key={s} value={s}>{s}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={() => setStatusOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={() => handleStatusUpdate(selectedOrder._id, newStatus)}
+            sx={{ backgroundColor: "#1a1a2e", "&:hover": { backgroundColor: "#0f3460" } }}>
+            Update
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Create PO Dialog */}
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle fontWeight={600}>Create Purchase Order</DialogTitle>
@@ -184,12 +204,11 @@ const WarehousePurchaseOrders = () => {
               <InputLabel>Supplier *</InputLabel>
               <Select value={form.supplier} label="Supplier *"
                 onChange={(e) => setForm({ ...form, supplier: e.target.value })}>
-                {suppliers.map((s) => <MenuItem key={s._id} value={s._id}>{s.name}</MenuItem>)}
+                {suppliers.map(s => <MenuItem key={s._id} value={s._id}>{s.name}</MenuItem>)}
               </Select>
             </FormControl>
             <Typography variant="caption" color="text.secondary">Expected Delivery Date</Typography>
-            <TextField size="small" fullWidth type="date"
-              InputLabelProps={{ shrink: true }}
+            <TextField size="small" fullWidth type="date" InputLabelProps={{ shrink: true }}
               value={form.expectedDeliveryDate}
               onChange={(e) => setForm({ ...form, expectedDeliveryDate: e.target.value })} />
             <Typography variant="subtitle2" fontWeight={600}>Items</Typography>
@@ -199,7 +218,7 @@ const WarehousePurchaseOrders = () => {
                   <InputLabel>Product</InputLabel>
                   <Select value={item.product} label="Product"
                     onChange={(e) => updateItem(index, "product", e.target.value)}>
-                    {products.map((p) => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
+                    {products.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
                   </Select>
                 </FormControl>
                 <TextField label="Qty" size="small" type="number" sx={{ flex: 1 }}
@@ -218,28 +237,6 @@ const WarehousePurchaseOrders = () => {
           <Button variant="contained" onClick={handleSubmit}
             sx={{ backgroundColor: "#1a1a2e", "&:hover": { backgroundColor: "#0f3460" } }}>
             Create Order
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Status Update Dialog */}
-      <Dialog open={statusOpen} onClose={() => setStatusOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle fontWeight={600}>Update Order Status</DialogTitle>
-        <DialogContent>
-          <FormControl size="small" fullWidth sx={{ mt: 1 }}>
-            <InputLabel>Status</InputLabel>
-            <Select value={newStatus} label="Status" onChange={(e) => setNewStatus(e.target.value)}>
-              {["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"].map((s) => (
-                <MenuItem key={s} value={s}>{s}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions sx={{ p: 3 }}>
-          <Button onClick={() => setStatusOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleStatusUpdate}
-            sx={{ backgroundColor: "#1a1a2e", "&:hover": { backgroundColor: "#0f3460" } }}>
-            Update
           </Button>
         </DialogActions>
       </Dialog>
