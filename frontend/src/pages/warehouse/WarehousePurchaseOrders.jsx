@@ -39,9 +39,16 @@ const WarehousePurchaseOrders = () => {
         API.get("/suppliers"),
         API.get("/products"),
       ]);
-      setOrders(poRes.data.data || []);
-      setSuppliers(supRes.data.data || []);
-      setProducts(prodRes.data.data || []);
+      console.log("PO RESPONSE:", poRes);
+      console.log("PO DATA:", poRes.data);
+      console.log("SUPPLIERS RESPONSE:", supRes);
+      console.log("SUPPLIERS DATA:", supRes.data);
+      console.log("SUPPLIERS DATA.DATA:", supRes.data.suppliers);
+      console.log("PRODUCTS RESPONSE:", prodRes);
+      console.log("PRODUCTS DATA:", prodRes.data);
+      setOrders(poRes.data.orders || []);
+      setSuppliers(supRes.data.suppliers || []);
+      setProducts(prodRes.data.products || []);
     } catch {
       setError("Failed to load data.");
     } finally {
@@ -61,13 +68,33 @@ const WarehousePurchaseOrders = () => {
 
   const handleSubmit = async () => {
     try {
-      await API.post("/purchase-orders", form);
+      console.log("SUBMIT CLICKED");
+      console.log("FORM DATA:", form);
+
+      const res = await API.post("/purchase-orders", form);
+
+      console.log("SUCCESS RESPONSE:", res.data);
+
       setSuccess("Purchase order created successfully!");
       setOpen(false);
-      setForm({ supplier: "", expectedDeliveryDate: "", notes: "", items: [{ product: "", quantity: 1, unitPrice: 0 }] });
+
+      setForm({
+        supplier: "",
+        expectedDeliveryDate: "",
+        notes: "",
+        items: [{ product: "", quantity: 1, unitPrice: 0 }]
+      });
+
       fetchData();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to create purchase order.");
+      console.log("ERROR RESPONSE:", err.response);
+      console.log("ERROR DATA:", err.response?.data);
+      console.log("FULL ERROR:", err);
+
+      setError(
+        err.response?.data?.message ||
+        "Failed to create purchase order."
+      );
     }
   };
 

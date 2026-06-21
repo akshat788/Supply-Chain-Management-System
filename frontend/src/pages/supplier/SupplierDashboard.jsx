@@ -26,7 +26,9 @@ const SupplierDashboard = () => {
     const fetchOrders = async () => {
       try {
         const { data } = await API.get("/purchase-orders");
-        setOrders(data.data || []);
+        console.log("SUPPLIER RESPONSE:", data);
+        console.log("SUPPLIER ORDERS:", data.orders);
+        setOrders(data.orders || []);
       } catch {
         setError("Failed to load purchase orders.");
       } finally {

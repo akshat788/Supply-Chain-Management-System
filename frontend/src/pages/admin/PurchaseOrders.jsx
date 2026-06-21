@@ -39,9 +39,16 @@ const PurchaseOrders = () => {
         API.get("/suppliers"),
         API.get("/products"),
       ]);
-      setOrders(poRes.data.data || []);
-      setSuppliers(supRes.data.data || []);
-      setProducts(prodRes.data.data || []);
+      console.log("PO RESPONSE:", poRes);
+      console.log("PO DATA:", poRes.data);
+      console.log("SUPPLIERS RESPONSE:", supRes);
+      console.log("SUPPLIERS DATA:", supRes.data);
+      console.log("SUPPLIERS DATA.DATA:", supRes.data.suppliers);
+      console.log("PRODUCTS RESPONSE:", prodRes);
+      console.log("PRODUCTS DATA:", prodRes.data);
+      setOrders(poRes.data.orders || []);
+      setSuppliers(supRes.data.suppliers || []);
+      setProducts(prodRes.data.products || []);
     } catch {
       setError("Failed to load data.");
     } finally {
