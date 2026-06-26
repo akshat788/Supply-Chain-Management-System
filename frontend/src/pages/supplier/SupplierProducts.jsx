@@ -6,29 +6,39 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead,
   TableRow, Paper, Chip, Dialog, DialogTitle, DialogContent,
   DialogActions, Alert, CircularProgress, MenuItem, Select,
-  FormControl, InputLabel, IconButton,
+  FormControl, InputLabel, IconButton, InputAdornment,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
+import SearchIcon from "@mui/icons-material/Search";
 
 const categories = ["Electronics", "Fashion", "Food", "Pharmaceutical", "Furniture", "Other"];
 
 const SupplierProducts = () => {
   const [products, setProducts] = useState([]);
+  const [inventory, setInventory] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All");
   const [form, setForm] = useState({
     name: "", category: "Electronics", description: "",
     costPrice: "", sellingPrice: "", unit: "pcs",
   });
 
-  const fetchProducts = async () => {
+  const fetchData = async () => {
     try {
-      const { data } = await API.get("/products");
-      setProducts(data.products);
+      const [prodRes, invRes] = await Promise.all([
+        API.get("/products"),
+        API.get("/inventory"),
+      ]);
+      setProducts(prodRes.data.products);
+      setFiltered(prodRes.data.products);
+      setInventory(invRes.data.inventory);
     } catch {
       setError("Failed to load products.");
     } finally {
@@ -36,7 +46,29 @@ const SupplierProducts = () => {
     }
   };
 
-  useEffect(() => { fetchProducts(); }, []);
+  useEffect(() => { fetchData(); }, []);
+
+  useEffect(() => {
+    let result = products;
+    if (search) result = result.filter(p =>
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.sku?.toLowerCase().includes(search.toLowerCase())
+    );
+    if (categoryFilter !== "All") result = result.filter(p => p.category === categoryFilter);
+    setFiltered(result);
+  }, [search, categoryFilter, products]);
+
+  const getStock = (productId) => {
+    const inv = inventory.find(i => i.product?._id === productId);
+    return inv ? inv.availableStock : null;
+  };
+
+  const getStockStatus = (stock) => {
+    if (stock === null) return { label: "No Inventory", color: "default" };
+    if (stock === 0) return { label: "Out of Stock", color: "error" };
+    if (stock <= 50) return { label: "Low Stock", color: "warning" };
+    return { label: "Active", color: "success" };
+  };
 
   const handleOpen = (product = null) => {
     if (product) {
@@ -73,11 +105,13 @@ const SupplierProducts = () => {
       setOpen(false);
       setEditId(null);
       setForm({ name: "", category: "Electronics", description: "", costPrice: "", sellingPrice: "", unit: "pcs" });
-      fetchProducts();
+      fetchData();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to save product.");
     }
   };
+
+
 
   return (
     <Layout>
@@ -95,6 +129,20 @@ const SupplierProducts = () => {
       {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError("")}>{error}</Alert>}
       {success && <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess("")}>{success}</Alert>}
 
+      {/* Search + Filter */}
+      <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
+        <TextField placeholder="Search products..." size="small" sx={{ flex: 1, backgroundColor: "#fff" }}
+          value={search} onChange={(e) => setSearch(e.target.value)}
+          InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> }} />
+        <FormControl size="small" sx={{ minWidth: 150 }}>
+          <InputLabel>Category</InputLabel>
+          <Select value={categoryFilter} label="Category" onChange={(e) => setCategoryFilter(e.target.value)}>
+            <MenuItem value="All">All</MenuItem>
+            {categories.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
+          </Select>
+        </FormControl>
+      </Box>
+
       <Card sx={{ borderRadius: 3, boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
         <CardContent sx={{ p: 0 }}>
           {loading ? (
@@ -104,34 +152,45 @@ const SupplierProducts = () => {
               <Table>
                 <TableHead sx={{ backgroundColor: "#f8f9fa" }}>
                   <TableRow>
-                    {["SKU", "Name", "Category", "Cost Price", "Selling Price", "Unit", "Actions"].map((h) => (
+                    {["SKU", "Name", "Category", "Cost Price", "Selling Price", "Stock", "Status", "Actions"].map(h => (
                       <TableCell key={h} sx={{ fontWeight: 600, color: "#1a1a2e" }}>{h}</TableCell>
                     ))}
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {products.length === 0 ? (
+                  {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} align="center" sx={{ py: 4, color: "text.secondary" }}>
-                        No products found. Add your first product.
+                      <TableCell colSpan={8} align="center" sx={{ py: 4, color: "text.secondary" }}>
+                        No products found.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    products.map((p) => (
-                      <TableRow key={p._id} hover>
-                        <TableCell><Chip label={p.sku} size="small" /></TableCell>
-                        <TableCell sx={{ fontWeight: 500 }}>{p.name}</TableCell>
-                        <TableCell><Chip label={p.category} size="small" variant="outlined" /></TableCell>
-                        <TableCell>₹{p.costPrice?.toLocaleString()}</TableCell>
-                        <TableCell>₹{p.sellingPrice?.toLocaleString()}</TableCell>
-                        <TableCell>{p.unit}</TableCell>
-                        <TableCell>
-                          <IconButton size="small" color="primary" onClick={() => handleOpen(p)}>
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    filtered.map(p => {
+                      const stock = getStock(p._id);
+                      const stockStatus = getStockStatus(stock);
+                      return (
+                        <TableRow key={p._id} hover>
+                          <TableCell><Chip label={p.sku} size="small" /></TableCell>
+                          <TableCell sx={{ fontWeight: 500 }}>{p.name}</TableCell>
+                          <TableCell><Chip label={p.category} size="small" variant="outlined" /></TableCell>
+                          <TableCell>₹{p.costPrice?.toLocaleString()}</TableCell>
+                          <TableCell>₹{p.sellingPrice?.toLocaleString()}</TableCell>
+                          <TableCell>
+                            <Typography variant="body2" fontWeight={600}>
+                              {stock !== null ? `${stock} ${p.unit}` : "—"}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Chip label={stockStatus.label} size="small" color={stockStatus.color} />
+                          </TableCell>
+                          <TableCell>
+                            <IconButton size="small" color="primary" onClick={() => handleOpen(p)}>
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
@@ -140,32 +199,28 @@ const SupplierProducts = () => {
         </CardContent>
       </Card>
 
-      {/* Add / Edit Product Dialog */}
+      {/* Add/Edit Dialog */}
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle fontWeight={600}>{editId ? "Edit Product" : "Add New Product"}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
             <TextField label="Product Name *" size="small" fullWidth
               value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-
             <FormControl size="small" fullWidth>
               <InputLabel>Category</InputLabel>
               <Select value={form.category} label="Category"
                 onChange={(e) => setForm({ ...form, category: e.target.value })}>
-                {categories.map((c) => <MenuItem key={c} value={c}>{c}</MenuItem>)}
+                {categories.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
               </Select>
             </FormControl>
-
             <TextField label="Description" size="small" fullWidth multiline rows={2}
               value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField label="Cost Price *" size="small" fullWidth type="number"
                 value={form.costPrice} onChange={(e) => setForm({ ...form, costPrice: e.target.value })} />
               <TextField label="Selling Price *" size="small" fullWidth type="number"
                 value={form.sellingPrice} onChange={(e) => setForm({ ...form, sellingPrice: e.target.value })} />
             </Box>
-
             <TextField label="Unit (pcs/kg/litre)" size="small" fullWidth
               value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
           </Box>

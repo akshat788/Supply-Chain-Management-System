@@ -38,6 +38,7 @@ const menuItems = {
   ],
   warehouse_manager: [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/warehouse/dashboard" },
+    { text: "Products", icon: <CategoryIcon />, path: "/warehouse/products" },
     { text: "Inventory", icon: <InventoryIcon />, path: "/warehouse/inventory" },
     { text: "Purchase Orders", icon: <ShoppingCartIcon />, path: "/warehouse/purchase-orders" },
     { text: "Orders", icon: <StorefrontIcon />, path: "/warehouse/orders" },

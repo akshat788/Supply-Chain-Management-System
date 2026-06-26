@@ -5,8 +5,10 @@ import { loginSuccess } from "../redux/authSlice";
 import API from "../api/axios";
 import {
   Box, Card, CardContent, TextField, Button,
-  Typography, Alert, CircularProgress,
+  Typography, Alert, CircularProgress, Divider,
 } from "@mui/material";
+import LockIcon from "@mui/icons-material/Lock";
+import StorefrontIcon from "@mui/icons-material/Storefront";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -45,14 +47,13 @@ const Login = () => {
       background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
       p: 2,
     }}>
-      <Card sx={{
-        width: "100%",
-        maxWidth: 400,
-        borderRadius: 3,
-        boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
-      }}>
+      <Card sx={{ width: "100%", maxWidth: 420, borderRadius: 3, boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
         <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
+          {/* Header */}
           <Box sx={{ textAlign: "center", mb: 4 }}>
+            <Box sx={{ display: "inline-flex", p: 2, borderRadius: "50%", backgroundColor: "#1a1a2e15", mb: 1 }}>
+              <LockIcon sx={{ fontSize: 32, color: "#1a1a2e" }} />
+            </Box>
             <Typography variant="h5" fontWeight="bold" color="#1a1a2e">SCM System</Typography>
             <Typography variant="body2" color="text.secondary" mt={0.5}>Supply Chain Management</Typography>
           </Box>
@@ -65,21 +66,39 @@ const Login = () => {
 
           <form onSubmit={handleSubmit}>
             <TextField fullWidth label="Email" name="email" type="email"
-              value={form.email} onChange={handleChange} required sx={{ mb: 2 }} size="small" />
+              value={form.email} onChange={handleChange}
+              required sx={{ mb: 2 }} size="small" />
             <TextField fullWidth label="Password" name="password" type="password"
-              value={form.password} onChange={handleChange} required sx={{ mb: 3 }} size="small" />
-            <Button type="submit" fullWidth variant="contained" size="large" disabled={loading}
-              sx={{ backgroundColor: "#1a1a2e", "&:hover": { backgroundColor: "#0f3460" }, borderRadius: 2, py: 1.5 }}>
+              value={form.password} onChange={handleChange}
+              required sx={{ mb: 3 }} size="small" />
+            <Button type="submit" fullWidth variant="contained" size="large"
+              disabled={loading}
+              sx={{ backgroundColor: "#1a1a2e", "&:hover": { backgroundColor: "#0f3460" },
+                borderRadius: 2, py: 1.5 }}>
               {loading ? <CircularProgress size={24} color="inherit" /> : "Sign In"}
             </Button>
           </form>
 
-          <Typography variant="body2" textAlign="center" mt={3} color="text.secondary">
-            Don't have an account?{" "}
-            <Link to="/register" style={{ color: "#0f3460", fontWeight: 600, textDecoration: "none" }}>
-              Sign Up
+          <Divider sx={{ my: 3 }} />
+
+          {/* Retailer signup */}
+          <Box sx={{ textAlign: "center" }}>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, mb: 1 }}>
+              <StorefrontIcon sx={{ fontSize: 18, color: "#66bb6a" }} />
+              <Typography variant="body2" fontWeight={500} color="#66bb6a">New Retailer?</Typography>
+            </Box>
+            <Link to="/register" style={{ textDecoration: "none" }}>
+              <Button fullWidth variant="outlined"
+                sx={{ borderColor: "#66bb6a", color: "#66bb6a",
+                  "&:hover": { borderColor: "#388e3c", backgroundColor: "#e8f5e9" },
+                  borderRadius: 2 }}>
+                Register as Retailer
+              </Button>
             </Link>
-          </Typography>
+            <Typography variant="caption" color="text.secondary" display="block" mt={1.5}>
+              Supplier & Warehouse accounts are created by Admin
+            </Typography>
+          </Box>
         </CardContent>
       </Card>
     </Box>

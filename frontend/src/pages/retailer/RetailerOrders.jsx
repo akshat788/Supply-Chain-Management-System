@@ -1,110 +1,99 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import API from "../../api/axios";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../redux/cartSlice";
 import {
-  Box, Card, CardContent, Typography, Button, Table, TableBody,
-  TableCell, TableContainer, TableHead, TableRow, Paper, Chip,
-  Alert, CircularProgress, Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField, MenuItem, Select, FormControl,
-  InputLabel, IconButton,
+  Box, Card, CardContent, Typography, Table, TableBody,
+  TableCell, TableContainer, TableHead, TableRow, Paper,
+  Chip, Alert, CircularProgress, Dialog, DialogTitle,
+  DialogContent, DialogActions, Button, ToggleButton,
+  ToggleButtonGroup, Stepper, Step, StepLabel, Grid,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
+import ReplayIcon from "@mui/icons-material/Replay";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { IconButton } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const statusColors = {
   Pending: "warning", Approved: "info", Allocated: "secondary",
   Dispatched: "primary", Delivered: "success", Cancelled: "error",
 };
 
+const orderSteps = ["Pending", "Approved", "Allocated", "Dispatched", "Delivered"];
+
 const RetailerOrders = () => {
   const [orders, setOrders] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({
-    shippingAddress: "",
-    notes: "",
-    items: [{ product: "", quantity: 1, unitPrice: 0 }],
-  });
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [viewOpen, setViewOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const fetchData = async () => {
-    try {
-      const [ordersRes, productsRes] = await Promise.all([
-        API.get("/orders/my-orders"),
-        API.get("/products"),
-      ]);
-      setOrders(ordersRes.data.orders);
-      setProducts(productsRes.data.products);
-    } catch {
-      setError("Failed to load data.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchData(); }, []);
-
-  const addItem = () => {
-    setForm({ ...form, items: [...form.items, { product: "", quantity: 1, unitPrice: 0 }] });
-  };
-
-  const removeItem = (index) => {
-    const items = form.items.filter((_, i) => i !== index);
-    setForm({ ...form, items });
-  };
-
-  const updateItem = (index, field, value) => {
-    const items = [...form.items];
-    items[index][field] = value;
-    // Auto fill unit price when product is selected
-    if (field === "product") {
-      const selectedProduct = products.find((p) => p._id === value);
-      if (selectedProduct) items[index].unitPrice = selectedProduct.sellingPrice;
-    }
-    setForm({ ...form, items });
-  };
-
-  const calculateTotal = () => {
-    return form.items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
-  };
-
-  const handleSubmit = async () => {
-    try {
-      if (!form.shippingAddress) {
-        setError("Please enter shipping address.");
-        return;
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const { data } = await API.get("/orders/my-orders");
+        setOrders(data.orders);
+        setFiltered(data.orders);
+      } catch {
+        setError("Failed to load your orders.");
+      } finally {
+        setLoading(false);
       }
-      if (form.items.some((i) => !i.product)) {
-        setError("Please select a product for all items.");
-        return;
+    };
+    fetchOrders();
+  }, []);
+
+  useEffect(() => {
+    if (statusFilter === "All") setFiltered(orders);
+    else setFiltered(orders.filter(o => o.status === statusFilter));
+  }, [statusFilter, orders]);
+
+  const handleReorder = (order) => {
+    order.items?.forEach(item => {
+      if (item.product) {
+        dispatch(addToCart({
+          product: item.product,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+        }));
       }
-      await API.post("/orders", form);
-      setSuccess("Order placed successfully!");
-      setOpen(false);
-      setForm({ shippingAddress: "", notes: "", items: [{ product: "", quantity: 1, unitPrice: 0 }] });
-      fetchData();
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to place order.");
-    }
+    });
+    setSuccess("Items added to cart! Go to Products to checkout.");
+    navigate("/retailer/products");
   };
+
+  const getActiveStep = (status) => {
+    const index = orderSteps.indexOf(status);
+    return index === -1 ? 0 : index;
+  };
+
+  const statuses = ["All", "Pending", "Approved", "Dispatched", "Delivered", "Cancelled"];
 
   return (
     <Layout>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-        <Box>
-          <Typography variant="h5" fontWeight="bold" color="#1a1a2e">My Orders</Typography>
-          <Typography variant="body2" color="text.secondary">Place and track your orders</Typography>
-        </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpen(true)}
-          sx={{ backgroundColor: "#1a1a2e", "&:hover": { backgroundColor: "#0f3460" }, borderRadius: 2 }}>
-          Place Order
-        </Button>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h5" fontWeight="bold" color="#1a1a2e">My Orders</Typography>
+        <Typography variant="body2" color="text.secondary">Track and manage your orders</Typography>
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError("")}>{error}</Alert>}
       {success && <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess("")}>{success}</Alert>}
+
+      {/* Status Filter */}
+      <Box sx={{ mb: 3, overflowX: "auto" }}>
+        <ToggleButtonGroup value={statusFilter} exclusive
+          onChange={(e, val) => val && setStatusFilter(val)} size="small">
+          {statuses.map(s => (
+            <ToggleButton key={s} value={s}>{s}</ToggleButton>
+          ))}
+        </ToggleButtonGroup>
+      </Box>
 
       <Card sx={{ borderRadius: 3, boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
         <CardContent sx={{ p: 0 }}>
@@ -115,29 +104,40 @@ const RetailerOrders = () => {
               <Table>
                 <TableHead sx={{ backgroundColor: "#f8f9fa" }}>
                   <TableRow>
-                    {["Order #", "Items", "Total Amount", "Status", "Shipping Address", "Date"].map((h) => (
-                      <TableCell key={h} sx={{ fontWeight: 600, color: "#1a1a2e" }}>{h}</TableCell>
+                    {["Order #", "Items", "Total", "Status", "Date", "Actions"].map(h => (
+                      <TableCell key={h} sx={{ fontWeight: 600 }}>{h}</TableCell>
                     ))}
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {orders.length === 0 ? (
+                  {filtered.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} align="center" sx={{ py: 4, color: "text.secondary" }}>
-                        No orders yet. Place your first order!
+                        No orders found.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    orders.map((o) => (
-                      <TableRow key={o._id} hover>
-                        <TableCell><Chip label={o.orderNumber} size="small" /></TableCell>
-                        <TableCell>{o.items?.length} item(s)</TableCell>
-                        <TableCell>₹{o.totalAmount?.toLocaleString()}</TableCell>
+                    filtered.map(order => (
+                      <TableRow key={order._id} hover>
+                        <TableCell fontWeight={500}>{order.orderNumber}</TableCell>
+                        <TableCell>{order.items?.length} item(s)</TableCell>
+                        <TableCell>₹{order.totalAmount?.toLocaleString()}</TableCell>
                         <TableCell>
-                          <Chip label={o.status} size="small" color={statusColors[o.status] || "default"} />
+                          <Chip label={order.status} size="small" color={statusColors[order.status] || "default"} />
                         </TableCell>
-                        <TableCell>{o.shippingAddress || "—"}</TableCell>
-                        <TableCell>{new Date(o.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <IconButton size="small" color="info"
+                            onClick={() => { setSelectedOrder(order); setViewOpen(true); }}>
+                            <VisibilityIcon fontSize="small" />
+                          </IconButton>
+                          {order.status === "Delivered" && (
+                            <IconButton size="small" color="primary" title="Reorder"
+                              onClick={() => handleReorder(order)}>
+                              <ReplayIcon fontSize="small" />
+                            </IconButton>
+                          )}
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -148,64 +148,78 @@ const RetailerOrders = () => {
         </CardContent>
       </Card>
 
-      {/* Place Order Dialog */}
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle fontWeight={600}>Place New Order</DialogTitle>
+      {/* Order Details + Tracking Timeline Dialog */}
+      <Dialog open={viewOpen} onClose={() => setViewOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle fontWeight={600}>Order Details</DialogTitle>
         <DialogContent>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-            <TextField label="Shipping Address *" size="small" fullWidth
-              value={form.shippingAddress}
-              onChange={(e) => setForm({ ...form, shippingAddress: e.target.value })} />
+          {selectedOrder && (
+            <Box>
+              {/* Tracking Timeline */}
+              <Card sx={{ mb: 3, p: 2, backgroundColor: "#f8f9fa", borderRadius: 2 }} elevation={0}>
+                <Typography variant="subtitle2" fontWeight={600} mb={2}>Order Tracking</Typography>
+                <Stepper activeStep={getActiveStep(selectedOrder.status)} alternativeLabel>
+                  {orderSteps.map(label => (
+                    <Step key={label} completed={orderSteps.indexOf(label) < getActiveStep(selectedOrder.status)}>
+                      <StepLabel>{label}</StepLabel>
+                    </Step>
+                  ))}
+                </Stepper>
+              </Card>
 
-            <Typography variant="subtitle2" fontWeight={600}>Order Items</Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle2" fontWeight={600} mb={1}>Order Info</Typography>
+                  {[
+                    { label: "Order Number", value: selectedOrder.orderNumber },
+                    { label: "Status", value: selectedOrder.status },
+                    { label: "Total Amount", value: `₹${selectedOrder.totalAmount?.toLocaleString()}` },
+                    { label: "Shipping Address", value: selectedOrder.shippingAddress || "—" },
+                    { label: "Order Date", value: new Date(selectedOrder.createdAt).toLocaleDateString() },
+                    { label: "Notes", value: selectedOrder.notes || "—" },
+                  ].map(item => (
+                    <Box key={item.label} sx={{ display: "flex", justifyContent: "space-between", py: 0.5, borderBottom: "1px solid #f0f0f0" }}>
+                      <Typography variant="body2" color="text.secondary">{item.label}</Typography>
+                      <Typography variant="body2" fontWeight={500}>{item.value}</Typography>
+                    </Box>
+                  ))}
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle2" fontWeight={600} mb={1}>Items Ordered</Typography>
+                  {selectedOrder.items?.map((item, i) => (
+                    <Box key={i} sx={{ display: "flex", justifyContent: "space-between", py: 0.5, borderBottom: "1px solid #f0f0f0" }}>
+                      <Box>
+                        <Typography variant="body2" fontWeight={500}>{item.product?.name || "Product"}</Typography>
+                        <Typography variant="caption" color="text.secondary">Qty: {item.quantity}</Typography>
+                      </Box>
+                      <Typography variant="body2" fontWeight={500}>
+                        ₹{item.totalPrice?.toLocaleString() || (item.quantity * item.unitPrice).toLocaleString()}
+                      </Typography>
+                    </Box>
+                  ))}
+                  <Box sx={{ mt: 1, pt: 1, display: "flex", justifyContent: "space-between" }}>
+                    <Typography fontWeight={600}>Total</Typography>
+                    <Typography fontWeight={600} color="#1a1a2e">₹{selectedOrder.totalAmount?.toLocaleString()}</Typography>
+                  </Box>
+                </Grid>
+              </Grid>
 
-            {form.items.map((item, index) => (
-              <Box key={index} sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                <FormControl size="small" sx={{ flex: 2 }}>
-                  <InputLabel>Product *</InputLabel>
-                  <Select value={item.product} label="Product *"
-                    onChange={(e) => updateItem(index, "product", e.target.value)}>
-                    {products.map((p) => (
-                      <MenuItem key={p._id} value={p._id}>
-                        {p.name} — ₹{p.sellingPrice?.toLocaleString()}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <TextField label="Qty" size="small" type="number" sx={{ flex: 1 }}
-                  value={item.quantity}
-                  onChange={(e) => updateItem(index, "quantity", Number(e.target.value))} />
-                <TextField label="Unit Price" size="small" type="number" sx={{ flex: 1 }}
-                  value={item.unitPrice}
-                  onChange={(e) => updateItem(index, "unitPrice", Number(e.target.value))} />
-                <IconButton size="small" color="error" onClick={() => removeItem(index)}
-                  disabled={form.items.length === 1}>
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Box>
-            ))}
-
-            <Button onClick={addItem} size="small" sx={{ alignSelf: "flex-start" }}>
-              + Add Item
-            </Button>
-
-            <Box sx={{ p: 2, backgroundColor: "#f8f9fa", borderRadius: 2 }}>
-              <Typography variant="subtitle1" fontWeight={600}>
-                Total: ₹{calculateTotal().toLocaleString()}
-              </Typography>
+              {selectedOrder.status === "Delivered" && (
+                <Box sx={{ mt: 2, p: 2, backgroundColor: "#e8f5e9", borderRadius: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Typography variant="body2" color="#66bb6a" fontWeight={500}>
+                    ✅ Order successfully delivered!
+                  </Typography>
+                  <Button size="small" variant="outlined" startIcon={<ReplayIcon />}
+                    onClick={() => { setViewOpen(false); handleReorder(selectedOrder); }}
+                    sx={{ color: "#66bb6a", borderColor: "#66bb6a" }}>
+                    Reorder
+                  </Button>
+                </Box>
+              )}
             </Box>
-
-            <TextField label="Notes (optional)" size="small" fullWidth multiline rows={2}
-              value={form.notes}
-              onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-          </Box>
+          )}
         </DialogContent>
         <DialogActions sx={{ p: 3 }}>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleSubmit}
-            sx={{ backgroundColor: "#1a1a2e", "&:hover": { backgroundColor: "#0f3460" } }}>
-            Place Order
-          </Button>
+          <Button onClick={() => setViewOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
     </Layout>

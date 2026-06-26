@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import Layout from "../../components/Layout";
 import API from "../../api/axios";
 import {
@@ -19,7 +20,36 @@ const statusColors = {
 
 const orderSteps = ["Pending", "Approved", "Allocated", "Dispatched", "Delivered"];
 
+// Valid transitions
+const allowedTransitions = {
+  Pending: ["Approved", "Cancelled"],
+  Approved: ["Allocated", "Cancelled"],
+  Allocated: ["Dispatched", "Cancelled"],
+  Dispatched: ["Delivered"],
+  Delivered: [],
+  Cancelled: [],
+};
+
+const transitionPermissions = {
+  "Pending->Approved": ["admin", "warehouse_manager"],
+  "Pending->Cancelled": ["admin", "warehouse_manager", "retailer"],
+  "Approved->Allocated": ["admin", "warehouse_manager"],
+  "Approved->Cancelled": ["admin", "warehouse_manager"],
+  "Allocated->Dispatched": ["admin", "warehouse_manager"],
+  "Allocated->Cancelled": ["admin", "warehouse_manager"],
+  "Dispatched->Delivered": ["admin", "warehouse_manager"],
+};
+
+const getValidNextStatuses = (currentStatus, role) => {
+  const transitions = allowedTransitions[currentStatus] || [];
+  return transitions.filter(next => {
+    const key = `${currentStatus}->${next}`;
+    return (transitionPermissions[key] || []).includes(role);
+  });
+};
+
 const Orders = () => {
+  const { user } = useSelector(state => state.auth);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -53,12 +83,21 @@ const Orders = () => {
     }
   };
 
-  const getActiveStep = (status) => {
-    const index = orderSteps.indexOf(status);
-    return index === -1 ? 0 : index;
+  const openStatusDialog = (order) => {
+    const validNext = getValidNextStatuses(order.status, user?.role);
+    if (validNext.length === 0) {
+      setError(`No status changes allowed from ${order.status} for your role.`);
+      return;
+    }
+    setSelectedOrder(order);
+    setNewStatus(validNext[0]);
+    setStatusOpen(true);
   };
 
+  const getActiveStep = (status) => Math.max(0, orderSteps.indexOf(status));
+
   const getETA = (order) => {
+    if (order.status === "Delivered") return "✅ Delivered";
     if (order.expectedDeliveryDate) return new Date(order.expectedDeliveryDate).toLocaleDateString();
     const created = new Date(order.createdAt);
     created.setDate(created.getDate() + 5);
@@ -97,38 +136,45 @@ const Orders = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    orders.map(o => (
-                      <TableRow key={o._id} hover>
-                        <TableCell><Chip label={o.orderNumber} size="small" /></TableCell>
-                        <TableCell>
-                          <Typography variant="body2" fontWeight={500}>{o.retailer?.name}</Typography>
-                          <Typography variant="caption" color="text.secondary">{o.retailer?.organization}</Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="caption" color="text.secondary">{o.retailer?.email}</Typography>
-                        </TableCell>
-                        <TableCell>{o.items?.length} item(s)</TableCell>
-                        <TableCell>₹{o.totalAmount?.toLocaleString()}</TableCell>
-                        <TableCell>
-                          <Chip label={o.status} size="small" color={statusColors[o.status] || "default"} />
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="caption" color={o.status === "Delivered" ? "success.main" : "text.secondary"}>
-                            {o.status === "Delivered" ? "✅ Delivered" : getETA(o)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <IconButton size="small" color="info"
-                            onClick={() => { setSelectedOrder(o); setViewOpen(true); }}>
-                            <VisibilityIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton size="small" color="primary"
-                            onClick={() => { setSelectedOrder(o); setNewStatus(o.status); setStatusOpen(true); }}>
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    orders.map(o => {
+                      const validNext = getValidNextStatuses(o.status, user?.role);
+                      const canEdit = validNext.length > 0;
+                      return (
+                        <TableRow key={o._id} hover>
+                          <TableCell><Chip label={o.orderNumber} size="small" /></TableCell>
+                          <TableCell>
+                            <Typography variant="body2" fontWeight={500}>{o.retailer?.name}</Typography>
+                            <Typography variant="caption" color="text.secondary">{o.retailer?.organization}</Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="caption" color="text.secondary">{o.retailer?.email}</Typography>
+                          </TableCell>
+                          <TableCell>{o.items?.length} item(s)</TableCell>
+                          <TableCell>₹{o.totalAmount?.toLocaleString()}</TableCell>
+                          <TableCell>
+                            <Chip label={o.status} size="small" color={statusColors[o.status] || "default"} />
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="caption"
+                              color={o.status === "Delivered" ? "success.main" : "text.secondary"}>
+                              {getETA(o)}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <IconButton size="small" color="info"
+                              onClick={() => { setSelectedOrder(o); setViewOpen(true); }}>
+                              <VisibilityIcon fontSize="small" />
+                            </IconButton>
+                            {canEdit && (
+                              <IconButton size="small" color="primary"
+                                onClick={() => openStatusDialog(o)}>
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
@@ -137,20 +183,17 @@ const Orders = () => {
         </CardContent>
       </Card>
 
-      {/* View Order Dialog with Stepper */}
+      {/* View Order Dialog */}
       <Dialog open={viewOpen} onClose={() => setViewOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle fontWeight={600}>Order Details</DialogTitle>
         <DialogContent>
           {selectedOrder && (
             <Box>
-              {/* Shipping Status Stepper */}
               <Card sx={{ mb: 3, p: 2, backgroundColor: "#f8f9fa", borderRadius: 2 }} elevation={0}>
                 <Typography variant="subtitle2" fontWeight={600} mb={2}>Shipping Status</Typography>
                 <Stepper activeStep={getActiveStep(selectedOrder.status)} alternativeLabel>
                   {orderSteps.map(label => (
-                    <Step key={label}>
-                      <StepLabel>{label}</StepLabel>
-                    </Step>
+                    <Step key={label}><StepLabel>{label}</StepLabel></Step>
                   ))}
                 </Stepper>
               </Card>
@@ -163,9 +206,8 @@ const Orders = () => {
                     { label: "Status", value: selectedOrder.status },
                     { label: "Total Amount", value: `₹${selectedOrder.totalAmount?.toLocaleString()}` },
                     { label: "Shipping Address", value: selectedOrder.shippingAddress || "—" },
-                    { label: "Expected Delivery", value: getETA(selectedOrder) },
-                    { label: "Delivered On", value: selectedOrder.deliveredDate ? new Date(selectedOrder.deliveredDate).toLocaleDateString() : "Not yet" },
-                    { label: "Notes", value: selectedOrder.notes || "—" },
+                    { label: "ETA", value: getETA(selectedOrder) },
+                    { label: "Inventory Updated", value: selectedOrder.inventoryUpdated ? "✅ Yes" : "❌ No" },
                   ].map(item => (
                     <Box key={item.label} sx={{ display: "flex", justifyContent: "space-between", py: 0.5, borderBottom: "1px solid #f0f0f0" }}>
                       <Typography variant="body2" color="text.secondary">{item.label}</Typography>
@@ -186,15 +228,33 @@ const Orders = () => {
                       <Typography variant="body2" fontWeight={500}>{item.value}</Typography>
                     </Box>
                   ))}
-                  <Typography variant="subtitle2" fontWeight={600} mt={2} mb={1}>Items Ordered</Typography>
+
+                  <Typography variant="subtitle2" fontWeight={600} mt={2} mb={1}>Items</Typography>
                   {selectedOrder.items?.map((item, i) => (
                     <Box key={i} sx={{ display: "flex", justifyContent: "space-between", py: 0.5, borderBottom: "1px solid #f0f0f0" }}>
-                      <Typography variant="body2">{item.product?.name || "Product"}</Typography>
+                      <Typography variant="body2">{item.product?.name}</Typography>
                       <Typography variant="body2" fontWeight={500}>
-                        {item.quantity} × ₹{item.unitPrice} = ₹{item.totalPrice?.toLocaleString()}
+                        {item.quantity} × ₹{item.unitPrice}
                       </Typography>
                     </Box>
                   ))}
+
+                  {/* Audit Trail */}
+                  {selectedOrder.statusHistory?.length > 0 && (
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="subtitle2" fontWeight={600} mb={1}>Status History</Typography>
+                      {selectedOrder.statusHistory.map((h, i) => (
+                        <Box key={i} sx={{ display: "flex", gap: 1, py: 0.5, borderBottom: "1px solid #f0f0f0" }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ minWidth: 80 }}>
+                            {new Date(h.timestamp).toLocaleDateString()}
+                          </Typography>
+                          <Typography variant="caption">
+                            <strong>{h.from}</strong> → <strong>{h.to}</strong> by {h.changedBy}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
                 </Grid>
               </Grid>
             </Box>
@@ -209,14 +269,22 @@ const Orders = () => {
       <Dialog open={statusOpen} onClose={() => setStatusOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle fontWeight={600}>Update Order Status</DialogTitle>
         <DialogContent>
-          <FormControl size="small" fullWidth sx={{ mt: 1 }}>
-            <InputLabel>Status</InputLabel>
-            <Select value={newStatus} label="Status" onChange={(e) => setNewStatus(e.target.value)}>
-              {["Pending", "Approved", "Allocated", "Dispatched", "Delivered", "Cancelled"].map(s => (
-                <MenuItem key={s} value={s}>{s}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          {selectedOrder && (
+            <Box>
+              <Typography variant="body2" color="text.secondary" mb={2}>
+                Current: <strong>{selectedOrder.status}</strong>
+              </Typography>
+              <FormControl size="small" fullWidth>
+                <InputLabel>New Status</InputLabel>
+                <Select value={newStatus} label="New Status"
+                  onChange={(e) => setNewStatus(e.target.value)}>
+                  {getValidNextStatuses(selectedOrder.status, user?.role).map(s => (
+                    <MenuItem key={s} value={s}>{s}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          )}
         </DialogContent>
         <DialogActions sx={{ p: 3 }}>
           <Button onClick={() => setStatusOpen(false)}>Cancel</Button>
