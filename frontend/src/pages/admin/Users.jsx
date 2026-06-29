@@ -210,8 +210,16 @@ const Users = () => {
               <Grid item xs={12} sm={6}>
                 <FormControl size="small" fullWidth>
                   <InputLabel>Role *</InputLabel>
-                  <Select value={createForm.role} label="Role *"
-                    onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}>
+                  <Select
+                    value={createForm.role}
+                    label="Role *"
+                    MenuProps={{
+                      disablePortal: true,
+                    }}
+                    onChange={(e) =>
+                      setCreateForm({ ...createForm, role: e.target.value })
+                    }
+                  >
                     <MenuItem value="admin">Admin</MenuItem>
                     <MenuItem value="supplier">Supplier</MenuItem>
                     <MenuItem value="warehouse_manager">Warehouse Manager</MenuItem>
