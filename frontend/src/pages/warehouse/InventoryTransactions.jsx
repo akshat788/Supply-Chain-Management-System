@@ -42,6 +42,14 @@ const InventoryTransactions = () => {
   useEffect(() => { fetchData(); }, []);
 
   const handleSubmit = async () => {
+    if (!form.product) {
+      setError("Product is required.");
+      return;
+    }
+    if (!form.quantity || form.quantity <= 0) {
+      setError("Quantity must be a positive number.");
+      return;
+    }
     try {
       await API.post("/inventory-transactions", form);
       setSuccess("Transaction recorded successfully!");

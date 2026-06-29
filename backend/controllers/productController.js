@@ -26,6 +26,9 @@ const getProductById = async (req, res) => {
 // POST create product
 const createProduct = async (req, res) => {
   try {
+    if (req.body.supplier === "") {
+      req.body.supplier = null;
+    }
     const product = await Product.create(req.body);
     res.status(201).json({ message: "Product created successfully", product });
   } catch (error) {
@@ -37,6 +40,9 @@ const createProduct = async (req, res) => {
 // PUT update product
 const updateProduct = async (req, res) => {
   try {
+    if (req.body.supplier === "") {
+      req.body.supplier = null;
+    }
     const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,

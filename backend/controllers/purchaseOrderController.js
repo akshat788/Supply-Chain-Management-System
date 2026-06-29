@@ -49,6 +49,9 @@ const getPurchaseOrderById = async (req, res) => {
 
 const createPurchaseOrder = async (req, res) => {
   try {
+    if (req.body.supplier === "") {
+      req.body.supplier = null;
+    }
     const order = await PurchaseOrder.create({
       ...req.body,
       createdBy: req.user ? req.user._id : null,

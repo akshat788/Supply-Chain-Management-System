@@ -112,7 +112,12 @@ const Products = () => {
 
   const handleSubmit = async () => {
     try {
-      const payload = { ...form, costPrice: Number(form.costPrice), sellingPrice: Number(form.sellingPrice) };
+      const payload = {
+        ...form,
+        costPrice: Number(form.costPrice),
+        sellingPrice: Number(form.sellingPrice),
+        supplier: form.supplier || null
+      };
       if (editId) {
         await API.put(`/products/${editId}`, payload);
         setSuccess("Product updated successfully!");

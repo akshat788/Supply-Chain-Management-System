@@ -64,6 +64,14 @@ const WarehousePurchaseOrders = () => {
   };
 
   const handleSubmit = async () => {
+    if (!form.supplier) {
+      setError("Supplier is required.");
+      return;
+    }
+    if (form.items.some(item => !item.product || item.quantity <= 0 || item.unitPrice < 0)) {
+      setError("All items must have a valid product, quantity > 0, and unit price >= 0.");
+      return;
+    }
     try {
       await API.post("/purchase-orders", form);
       setSuccess("Purchase order created successfully!");

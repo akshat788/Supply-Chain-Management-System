@@ -34,7 +34,8 @@ const createTransaction = async (req, res) => {
     const { product, action, quantity, type, reference, notes } = req.body;
 
     const transaction = await InventoryTransaction.create({
-      product, action, quantity, type, reference, notes,
+      product: product === "" ? null : product,
+      action, quantity, type, reference, notes,
       performedBy: req.user._id,
     });
 
