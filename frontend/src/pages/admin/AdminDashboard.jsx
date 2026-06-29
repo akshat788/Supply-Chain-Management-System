@@ -58,6 +58,47 @@ const AdminDashboard = () => {
     fetchStats();
   }, []);
 
+  useEffect(() => {
+    setTimeout(() => {
+      const xpath = "//*[text()='Total Suppliers']";
+      const result = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+      let element = result.singleNodeValue;
+      if (!element) {
+        console.log("Total Suppliers element not found");
+        return;
+      }
+      
+      console.log("=== START PARENT CHAIN ===");
+      while (element && element !== document.documentElement) {
+        const styles = window.getComputedStyle(element);
+        const info = {
+          tagName: element.tagName,
+          id: element.id,
+          classList: Array.from(element.classList),
+          sizes: {
+            offsetWidth: element.offsetWidth,
+            clientWidth: element.clientWidth,
+            scrollWidth: element.scrollWidth
+          },
+          computedStyles: {
+            width: styles.getPropertyValue('width'),
+            maxWidth: styles.getPropertyValue('max-width'),
+            minWidth: styles.getPropertyValue('min-width'),
+            display: styles.getPropertyValue('display'),
+            margin: styles.getPropertyValue('margin'),
+            padding: styles.getPropertyValue('padding'),
+            boxSizing: styles.getPropertyValue('box-sizing'),
+            flexGrow: styles.getPropertyValue('flex-grow')
+          }
+        };
+        console.log("CHAIN_ELEMENT:", JSON.stringify(info));
+        element = element.parentElement;
+      }
+      console.log("=== END PARENT CHAIN ===");
+    }, 2000);
+  }, []);
+
+
   const getStatusColor = (status) => {
     const map = { Pending: "warning", Confirmed: "info", Shipped: "primary", Delivered: "success", Cancelled: "error", Approved: "info", Dispatched: "primary" };
     return map[status] || "default";
@@ -86,16 +127,16 @@ const AdminDashboard = () => {
         <>
           {/* Stat Cards */}
           <Grid container spacing={3} sx={{ mb: 3 }}>
-            <Grid item xs={12} sm={6} lg={3}>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
               <StatCard title="Total Suppliers" value={stats.counts.totalSuppliers} icon={<LocalShippingIcon />} color="#06b6d4" />
             </Grid>
-            <Grid item xs={12} sm={6} lg={3}>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
               <StatCard title="Total Products" value={stats.counts.totalProducts} icon={<InventoryIcon />} color="#4f46e5" />
             </Grid>
-            <Grid item xs={12} sm={6} lg={3}>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
               <StatCard title="Total Orders" value={stats.counts.totalOrders} icon={<ShoppingCartIcon />} color="#10b981" />
             </Grid>
-            <Grid item xs={12} sm={6} lg={3}>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
               <StatCard title="Low Stock Items" value={stats.counts.lowStockItems} icon={<WarningIcon />} color="#ef4444" subtitle="Needs attention" />
             </Grid>
           </Grid>
