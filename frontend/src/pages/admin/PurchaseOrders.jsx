@@ -309,7 +309,7 @@ const PurchaseOrders = () => {
       </Dialog>
 
       {/* Update Status Dialog */}
-      <Dialog open={statusOpen} onClose={() => setStatusOpen(false)} maxWidth="xs" fullWidth disableEnforceFocus>
+      <Dialog open={statusOpen} onClose={() => setStatusOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle fontWeight={600}>Update Order Status</DialogTitle>
         <DialogContent>
           {selectedOrder && (
@@ -339,7 +339,7 @@ const PurchaseOrders = () => {
       </Dialog>
 
       {/* Create PO Dialog */}
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth disableEnforceFocus>
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle fontWeight={600}>Create Purchase Order</DialogTitle>
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>

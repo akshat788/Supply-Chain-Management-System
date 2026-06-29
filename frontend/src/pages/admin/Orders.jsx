@@ -266,7 +266,7 @@ const Orders = () => {
       </Dialog>
 
       {/* Update Status Dialog */}
-      <Dialog open={statusOpen} onClose={() => setStatusOpen(false)} maxWidth="xs" fullWidth disableEnforceFocus>
+      <Dialog open={statusOpen} onClose={() => setStatusOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle fontWeight={600}>Update Order Status</DialogTitle>
         <DialogContent>
           {selectedOrder && (

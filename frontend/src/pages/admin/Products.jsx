@@ -230,7 +230,7 @@ const Products = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth disableEnforceFocus>
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle fontWeight={600}>{editId ? "Edit Product" : "Add New Product"}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>

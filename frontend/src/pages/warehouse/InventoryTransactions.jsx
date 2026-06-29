@@ -194,7 +194,7 @@ const InventoryTransactions = () => {
       </Card>
 
       {/* Manual Adjustment Dialog */}
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth disableEnforceFocus>
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle fontWeight={600}>Manual Stock Adjustment</DialogTitle>
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
