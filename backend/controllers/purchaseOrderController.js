@@ -22,7 +22,22 @@ const transitionPermissions = {
 
 const getPurchaseOrders = async (req, res) => {
   try {
-    const orders = await PurchaseOrder.find()
+    let query = {};
+    if (req.user && req.user.role === "supplier") {
+      const Supplier = require("../models/supplierModel");
+      const supplierProfile = await Supplier.findOne({
+        $or: [
+          { email: req.user.email.toLowerCase() },
+          { name: req.user.organization }
+        ]
+      });
+      if (!supplierProfile) {
+        return res.status(200).json({ count: 0, orders: [] });
+      }
+      query = { supplier: supplierProfile._id };
+    }
+
+    const orders = await PurchaseOrder.find(query)
       .populate("supplier", "name supplierCode email phone contactPerson")
       .populate("items.product", "name sku")
       .populate("createdBy", "name email")
@@ -41,6 +56,21 @@ const getPurchaseOrderById = async (req, res) => {
       .populate("createdBy", "name email")
       .populate("statusHistory.userId", "name role");
     if (!order) return res.status(404).json({ message: "Purchase order not found" });
+
+    // Restrict access for suppliers
+    if (req.user && req.user.role === "supplier") {
+      const Supplier = require("../models/supplierModel");
+      const supplierProfile = await Supplier.findOne({
+        $or: [
+          { email: req.user.email.toLowerCase() },
+          { name: req.user.organization }
+        ]
+      });
+      if (!supplierProfile || order.supplier?._id.toString() !== supplierProfile._id.toString()) {
+        return res.status(403).json({ message: "Access denied. This purchase order does not belong to you." });
+      }
+    }
+
     res.status(200).json({ order });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
@@ -64,6 +94,20 @@ const updatePurchaseOrderStatus = async (req, res) => {
     const { status, trackingNumber, courierName, expectedDeliveryDate, notes } = req.body;
     const order = await PurchaseOrder.findById(req.params.id);
     if (!order) return res.status(404).json({ message: "Purchase order not found" });
+
+    // Validate supplier ownership if logged-in user is a supplier
+    if (req.user && req.user.role === "supplier") {
+      const Supplier = require("../models/supplierModel");
+      const supplierProfile = await Supplier.findOne({
+        $or: [
+          { email: req.user.email.toLowerCase() },
+          { name: req.user.organization }
+        ]
+      });
+      if (!supplierProfile || order.supplier.toString() !== supplierProfile._id.toString()) {
+        return res.status(403).json({ message: "Access denied. You cannot modify purchase orders belonging to other suppliers." });
+      }
+    }
 
     const currentStatus = order.status;
 
@@ -185,6 +229,20 @@ const supplierActionOnPO = async (req, res) => {
     const { action, notes, trackingNumber, courierName, expectedDeliveryDate } = req.body;
     const order = await PurchaseOrder.findById(req.params.id);
     if (!order) return res.status(404).json({ message: "Purchase order not found" });
+
+    // Validate supplier ownership
+    if (req.user && req.user.role === "supplier") {
+      const Supplier = require("../models/supplierModel");
+      const supplierProfile = await Supplier.findOne({
+        $or: [
+          { email: req.user.email.toLowerCase() },
+          { name: req.user.organization }
+        ]
+      });
+      if (!supplierProfile || order.supplier.toString() !== supplierProfile._id.toString()) {
+        return res.status(403).json({ message: "Access denied. You cannot modify purchase orders belonging to other suppliers." });
+      }
+    }
 
     const currentStatus = order.status;
 
