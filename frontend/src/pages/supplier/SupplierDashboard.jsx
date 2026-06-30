@@ -92,7 +92,7 @@ const SupplierDashboard = () => {
         <>
           {/* Stat Cards */}
           <Grid container spacing={3} sx={{ mb: 3 }}>
-            <Grid item xs={12} sm={6} lg={3}>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
               <Card>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -109,7 +109,7 @@ const SupplierDashboard = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={6} lg={3}>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
               <Card>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -124,7 +124,7 @@ const SupplierDashboard = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={6} lg={3}>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
               <Card>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -139,7 +139,7 @@ const SupplierDashboard = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={6} lg={3}>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
               <Card>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -158,7 +158,7 @@ const SupplierDashboard = () => {
 
           <Grid container spacing={3} sx={{ mb: 3 }}>
             {/* Performance Rating */}
-            <Grid item xs={12} md={5} lg={4}>
+            <Grid size={{ xs: 12, md: 5, lg: 4 }}>
               <Card sx={{ height: "100%" }}>
                 <CardContent>
                   <Typography variant="h6" fontWeight={600} mb={2}>Performance Rating</Typography>
@@ -192,7 +192,7 @@ const SupplierDashboard = () => {
             </Grid>
 
             {/* Recent Purchase Orders */}
-            <Grid item xs={12} md={7} lg={8}>
+            <Grid size={{ xs: 12, md: 7, lg: 8 }}>
               <Card sx={{ height: "100%" }}>
                 <CardContent>
                   <Typography variant="h6" fontWeight={600} mb={2}>Recent Purchase Orders</Typography>

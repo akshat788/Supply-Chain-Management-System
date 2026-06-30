@@ -167,7 +167,7 @@ const RetailerOrders = () => {
               </Card>
 
               <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Typography variant="subtitle2" fontWeight={600} mb={1}>Order Info</Typography>
                   {[
                     { label: "Order Number", value: selectedOrder.orderNumber },
@@ -183,7 +183,7 @@ const RetailerOrders = () => {
                     </Box>
                   ))}
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Typography variant="subtitle2" fontWeight={600} mb={1}>Items Ordered</Typography>
                   {selectedOrder.items?.map((item, i) => (
                     <Box key={i} sx={{ display: "flex", justifyContent: "space-between", py: 0.5, borderBottom: "1px solid #f0f0f0" }}>

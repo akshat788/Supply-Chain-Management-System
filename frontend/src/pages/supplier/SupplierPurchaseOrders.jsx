@@ -87,7 +87,7 @@ const SupplierPurchaseOrders = () => {
           { label: "Completed", value: completedOrders.length, color: "#66bb6a" },
           { label: "Total Orders", value: orders.length, color: "#ce93d8" },
         ].map(item => (
-          <Grid item xs={6} md={3} key={item.label}>
+          <Grid size={{ xs: 6, md: 3 }} key={item.label}>
             <Card sx={{ borderRadius: 3, boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
               <CardContent sx={{ p: 2, textAlign: "center" }}>
                 <Typography variant="h4" fontWeight="bold" color={item.color}>{item.value}</Typography>
@@ -200,7 +200,7 @@ const SupplierPurchaseOrders = () => {
               </Card>
 
               <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Typography variant="subtitle2" fontWeight={600} mb={1}>Order Info</Typography>
                   {[
                     { label: "PO Number", value: selectedOrder.poNumber },
@@ -217,7 +217,7 @@ const SupplierPurchaseOrders = () => {
                     </Box>
                   ))}
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Typography variant="subtitle2" fontWeight={600} mb={1}>Items to Supply</Typography>
                   {selectedOrder.items?.map((item, i) => (
                     <Box key={i} sx={{ display: "flex", justifyContent: "space-between", py: 0.5, borderBottom: "1px solid #f0f0f0" }}>

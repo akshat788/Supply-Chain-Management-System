@@ -71,11 +71,9 @@ const WarehouseDashboard = () => {
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>Warehouse operations overview</Typography>
       </Box>
 
-      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
-
-      {/* Stat Cards */}
+      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}      {/* Stat Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} lg={3}>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <Card>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -90,7 +88,7 @@ const WarehouseDashboard = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <Card>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -106,7 +104,7 @@ const WarehouseDashboard = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <Card>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -122,7 +120,7 @@ const WarehouseDashboard = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <Card>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -142,7 +140,7 @@ const WarehouseDashboard = () => {
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
         {/* Inventory Health */}
-        <Grid item xs={12} md={5} lg={4}>
+        <Grid size={{ xs: 12, md: 5, lg: 4 }}>
           <Card sx={{ height: "100%" }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} mb={2}>Inventory Health</Typography>
@@ -156,19 +154,19 @@ const WarehouseDashboard = () => {
                     "& .MuiLinearProgress-bar": { backgroundColor: "#10b981", borderRadius: 5 } }} />
               </Box>
               <Grid container spacing={1}>
-                <Grid item xs={4}>
+                <Grid size={{ xs: 4 }}>
                   <Box sx={{ textAlign: "center", p: 1, borderRadius: 2, backgroundColor: "#ecfdf5" }}>
                     <Typography variant="h6" fontWeight="bold" color="#10b981">{healthyCount}</Typography>
                     <Typography variant="caption" color="text.secondary">Healthy</Typography>
                   </Box>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid size={{ xs: 4 }}>
                   <Box sx={{ textAlign: "center", p: 1, borderRadius: 2, backgroundColor: "#fffbeb" }}>
                     <Typography variant="h6" fontWeight="bold" color="#f59e0b">{lowStockCount}</Typography>
                     <Typography variant="caption" color="text.secondary">Low</Typography>
                   </Box>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid size={{ xs: 4 }}>
                   <Box sx={{ textAlign: "center", p: 1, borderRadius: 2, backgroundColor: "#fef2f2" }}>
                     <Typography variant="h6" fontWeight="bold" color="#ef4444">{outOfStockCount}</Typography>
                     <Typography variant="caption" color="text.secondary">Out</Typography>
@@ -180,7 +178,7 @@ const WarehouseDashboard = () => {
         </Grid>
 
         {/* Warehouse Activity Feed */}
-        <Grid item xs={12} md={7} lg={8}>
+        <Grid size={{ xs: 12, md: 7, lg: 8 }}>
           <Card sx={{ height: "100%" }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} mb={2}>Warehouse Activity</Typography>
@@ -211,7 +209,7 @@ const WarehouseDashboard = () => {
 
       {/* Recent Orders + Recent POs */}
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card sx={{ borderRadius: 3, boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} mb={2}>Recent Orders</Typography>
@@ -231,7 +229,7 @@ const WarehouseDashboard = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card sx={{ borderRadius: 3, boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} mb={2}>Recent Purchase Orders</Typography>

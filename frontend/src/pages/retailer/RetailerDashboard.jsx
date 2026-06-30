@@ -83,7 +83,7 @@ const RetailerDashboard = () => {
 
       {/* Main Stats */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} lg={3}>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <Card>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -98,7 +98,7 @@ const RetailerDashboard = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <Card>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -113,7 +113,7 @@ const RetailerDashboard = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <Card>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -128,7 +128,7 @@ const RetailerDashboard = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <Card>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -149,7 +149,7 @@ const RetailerDashboard = () => {
 
       {/* Quick Stats */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={6} lg={4}>
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <Card sx={{ height: "100%" }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} mb={2}>Quick Stats</Typography>
@@ -168,7 +168,7 @@ const RetailerDashboard = () => {
         </Grid>
 
         {/* Recent Activity */}
-        <Grid item xs={12} md={6} lg={4}>
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <Card sx={{ height: "100%" }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} mb={2}>Recent Activity</Typography>
@@ -190,7 +190,7 @@ const RetailerDashboard = () => {
         </Grid>
 
         {/* Last Delivery */}
-        <Grid item xs={12} md={12} lg={4}>
+        <Grid size={{ xs: 12, md: 12, lg: 4 }}>
           <Card sx={{ height: "100%" }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} mb={2}>Last Delivery</Typography>

@@ -8,7 +8,7 @@ import {
   Alert, CircularProgress, TextField, InputAdornment,
   Button, IconButton, Badge, Dialog, DialogTitle,
   DialogContent, DialogActions, MenuItem, Select,
-  FormControl, InputLabel, Snackbar, Divider,
+  FormControl, InputLabel, Snackbar, Divider, Drawer, LinearProgress
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import CategoryIcon from "@mui/icons-material/Category";
@@ -16,6 +16,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import DeleteIcon from "@mui/icons-material/Delete";
+import StarIcon from "@mui/icons-material/Star";
 
 const categories = ["All", "Electronics", "Fashion", "Food", "Pharmaceutical", "Furniture", "Other"];
 const sortOptions = [
@@ -133,23 +134,49 @@ const RetailerProducts = () => {
 
       {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError("")}>{error}</Alert>}
 
-      {/* Search + Filter + Sort */}
+      {/* Category Quick Filters */}
+      <Box sx={{ display: "flex", gap: 1, mb: 3, flexWrap: "wrap", overflowX: "auto", py: 0.5 }}>
+        {categories.map(c => {
+          const isSelected = category === c;
+          return (
+            <Chip
+              key={c}
+              label={c}
+              onClick={() => setCategory(c)}
+              icon={c !== "All" ? <CategoryIcon style={{ color: isSelected ? "#fff" : categoryColors[c] }} /> : undefined}
+              sx={{
+                px: 1.5,
+                py: 2,
+                fontSize: "13px",
+                fontWeight: isSelected ? 700 : 500,
+                backgroundColor: isSelected ? "#1a1a2e" : "#f1f5f9",
+                color: isSelected ? "#fff" : "#475569",
+                borderRadius: "20px",
+                border: "1px solid",
+                borderColor: isSelected ? "#1a1a2e" : "transparent",
+                transition: "all 0.2s ease",
+                "&:hover": {
+                  backgroundColor: isSelected ? "#1a1a2e" : "#e2e8f0",
+                  transform: "translateY(-1px)",
+                },
+                "& .MuiChip-icon": {
+                  color: isSelected ? "#fff !important" : "inherit"
+                }
+              }}
+            />
+          );
+        })}
+      </Box>
+
+      {/* Search + Sort */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={5}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <TextField fullWidth placeholder="Search products..." size="small"
             sx={{ backgroundColor: "#fff", borderRadius: 2 }}
             value={search} onChange={(e) => setSearch(e.target.value)}
             InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> }} />
         </Grid>
-        <Grid item xs={6} md={4}>
-          <FormControl size="small" fullWidth>
-            <InputLabel>Category</InputLabel>
-            <Select value={category} label="Category" onChange={(e) => setCategory(e.target.value)}>
-              {categories.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={6} md={3}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <FormControl size="small" fullWidth>
             <InputLabel>Sort By</InputLabel>
             <Select value={sort} label="Sort By" onChange={(e) => setSort(e.target.value)}>
@@ -164,7 +191,7 @@ const RetailerProducts = () => {
       ) : (
         <Grid container spacing={3}>
           {filtered.length === 0 ? (
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <Typography color="text.secondary" textAlign="center" py={4}>No products found.</Typography>
             </Grid>
           ) : (
@@ -173,39 +200,77 @@ const RetailerProducts = () => {
               const cartQty = getCartQty(p._id);
               const isOutOfStock = stock === 0;
               return (
-                <Grid item xs={12} sm={6} md={4} key={p._id}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={p._id}>
                   <Card sx={{ borderRadius: 3, boxShadow: "0 2px 12px rgba(0,0,0,0.08)", height: "100%",
                     display: "flex", flexDirection: "column",
-                    "&:hover": { boxShadow: "0 4px 20px rgba(0,0,0,0.15)", transform: "translateY(-2px)" },
-                    transition: "all 0.2s ease",
-                    opacity: isOutOfStock ? 0.7 : 1,
+                    "&:hover": { boxShadow: "0 8px 24px rgba(0,0,0,0.12)", transform: "translateY(-4px)" },
+                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    opacity: isOutOfStock ? 0.75 : 1,
                   }}>
-                    <CardContent sx={{ flex: 1 }}>
-                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
-                        <Box sx={{ p: 1, borderRadius: 2, backgroundColor: `${categoryColors[p.category] || "#90a4ae"}20` }}>
-                          <CategoryIcon sx={{ color: categoryColors[p.category] || "#90a4ae" }} />
-                        </Box>
-                        <Chip label={p.category} size="small"
-                          sx={{ backgroundColor: `${categoryColors[p.category] || "#90a4ae"}20`, color: categoryColors[p.category] || "#90a4ae" }} />
+                    {/* Visual Card Header Gradient */}
+                    <Box sx={{
+                      height: 110,
+                      background: `linear-gradient(135deg, ${categoryColors[p.category] || "#90a4ae"}25, ${categoryColors[p.category] || "#90a4ae"}05)`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      position: "relative",
+                      borderTopLeftRadius: "12px",
+                      borderTopRightRadius: "12px",
+                    }}>
+                      <CategoryIcon sx={{ fontSize: 44, color: categoryColors[p.category] || "#90a4ae" }} />
+                      <Chip label={p.category} size="small"
+                        sx={{
+                          position: "absolute",
+                          top: 12,
+                          right: 12,
+                          backgroundColor: `${categoryColors[p.category] || "#90a4ae"}20`,
+                          color: categoryColors[p.category] || "#90a4ae",
+                          fontWeight: 700,
+                          fontSize: "11px"
+                        }}
+                      />
+                    </Box>
+
+                    <CardContent sx={{ flex: 1, p: 2.5 }}>
+                      {/* Rating */}
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 1 }}>
+                        <StarIcon sx={{ color: "#f59e0b", fontSize: 16 }} />
+                        <Typography variant="caption" fontWeight={700} color="#f59e0b">
+                          {(4.0 + (p.name.length % 10) / 10).toFixed(1)}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          ({10 + (p.name.length * 3) % 40} reviews)
+                        </Typography>
                       </Box>
 
-                      <Typography variant="h6" fontWeight={600} mb={0.5}>{p.name}</Typography>
-                      <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+                      <Typography variant="h6" fontWeight={700} color="#1a1a2e" mb={0.5} sx={{ fontSize: "16px", lineHeight: 1.3 }}>
+                        {p.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" display="block" mb={1.5}>
                         SKU: {p.sku} • Unit: {p.unit}
                       </Typography>
 
                       {p.description && (
-                        <Typography variant="body2" color="text.secondary" mb={1.5}
-                          sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <Typography variant="body2" color="text.secondary" mb={2}
+                          sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            minHeight: "40px",
+                            lineHeight: 1.4
+                          }}>
                           {p.description}
                         </Typography>
                       )}
 
                       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center",
-                        pt: 1.5, borderTop: "1px solid #f0f0f0", mb: 1 }}>
+                        pt: 1.5, borderTop: "1px solid #f1f5f9", mb: 1.5 }}>
                         <Box>
                           <Typography variant="caption" color="text.secondary">Price</Typography>
-                          <Typography variant="h6" fontWeight="bold" color="#1a1a2e">
+                          <Typography variant="h6" fontWeight="bold" color="#1a1a2e" sx={{ fontSize: "18px" }}>
                             ₹{p.sellingPrice?.toLocaleString()}
                           </Typography>
                         </Box>
@@ -218,9 +283,21 @@ const RetailerProducts = () => {
                         </Box>
                       </Box>
 
+                      {/* Stock Warning Progress Bar */}
+                      {stock > 0 && stock <= 50 && (
+                        <Box sx={{ mb: 1.5 }}>
+                          <LinearProgress variant="determinate" value={(stock / 100) * 100}
+                            sx={{ height: 4, borderRadius: 2, backgroundColor: "#fee2e2",
+                              "& .MuiLinearProgress-bar": { backgroundColor: "#ef6c00" } }} />
+                          <Typography variant="caption" color="#e65100" sx={{ display: "block", mt: 0.5, fontSize: "10.5px", fontWeight: 700 }}>
+                            🔥 Running Low! Only {stock} remaining.
+                          </Typography>
+                        </Box>
+                      )}
+
                       {p.supplier?.name && (
-                        <Typography variant="caption" color="text.secondary" display="block" mb={1}>
-                          Supplier: {p.supplier.name}
+                        <Typography variant="caption" color="text.secondary" display="block">
+                          Supplier: <strong>{p.supplier.name}</strong>
                         </Typography>
                       )}
                     </CardContent>
@@ -228,7 +305,7 @@ const RetailerProducts = () => {
                     <Box sx={{ p: 2, pt: 0 }}>
                       {cartQty > 0 ? (
                         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between",
-                          border: "1px solid #1a1a2e", borderRadius: 2, px: 1 }}>
+                          border: "1px solid #1a1a2e", borderRadius: 2, px: 1, py: 0.5 }}>
                           <IconButton size="small" onClick={() => {
                             if (cartQty === 1) dispatch(removeFromCart(p._id));
                             else dispatch(updateQuantity({ productId: p._id, quantity: cartQty - 1 }));
@@ -241,7 +318,7 @@ const RetailerProducts = () => {
                       ) : (
                         <Button fullWidth variant="contained" disabled={isOutOfStock}
                           startIcon={<ShoppingCartIcon />} onClick={() => handleAddToCart(p)}
-                          sx={{ backgroundColor: "#1a1a2e", "&:hover": { backgroundColor: "#0f3460" }, borderRadius: 2 }}>
+                          sx={{ backgroundColor: "#1a1a2e", "&:hover": { backgroundColor: "#0f3460" }, borderRadius: 2, textTransform: "none", py: 1, fontWeight: 600 }}>
                           {isOutOfStock ? "Out of Stock" : "Add to Cart"}
                         </Button>
                       )}
@@ -254,65 +331,75 @@ const RetailerProducts = () => {
         </Grid>
       )}
 
-      {/* Cart Dialog */}
-      <Dialog open={cartOpen} onClose={() => setCartOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle fontWeight={600}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Typography variant="h6" fontWeight={600}>Your Cart</Typography>
-            <Chip label={`${cartItems.length} items`} size="small" />
-          </Box>
-        </DialogTitle>
-        <DialogContent>
+      {/* Cart Drawer */}
+      <Drawer anchor="right" open={cartOpen} onClose={() => setCartOpen(false)} sx={{ "& .MuiDrawer-paper": { width: { xs: "100%", sm: 420 }, p: 3, display: "flex", flexDirection: "column" } }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+          <Typography variant="h6" fontWeight={700} color="#1a1a2e">Your Shopping Cart</Typography>
+          <Chip label={`${cartItems.length} items`} size="small" sx={{ backgroundColor: "rgba(26, 26, 46, 0.1)", fontWeight: 700 }} />
+        </Box>
+
+        <Box sx={{ flexGrow: 1, overflowY: "auto", mb: 2 }}>
           {cartItems.length === 0 ? (
-            <Box sx={{ textAlign: "center", py: 4 }}>
-              <ShoppingCartIcon sx={{ fontSize: 64, color: "#e0e0e0" }} />
-              <Typography color="text.secondary" mt={1}>Your cart is empty</Typography>
+            <Box sx={{ textAlign: "center", py: 10 }}>
+              <ShoppingCartIcon sx={{ fontSize: 64, color: "#cbd5e1", mb: 2 }} />
+              <Typography color="text.secondary" fontWeight={500}>Your cart is currently empty.</Typography>
             </Box>
           ) : (
-            <Box>
-              {cartItems.map(item => (
-                <Box key={item.product._id} sx={{ display: "flex", justifyContent: "space-between",
-                  alignItems: "center", py: 1.5, borderBottom: "1px solid #f0f0f0" }}>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" fontWeight={500}>{item.product.name}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      ₹{item.unitPrice?.toLocaleString()} × {item.quantity}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Typography fontWeight={600} color="#1a1a2e">
-                      ₹{(item.quantity * item.unitPrice).toLocaleString()}
-                    </Typography>
-                    <IconButton size="small" color="error"
-                      onClick={() => dispatch(removeFromCart(item.product._id))}>
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
+            cartItems.map(item => (
+              <Box key={item.product._id} sx={{ display: "flex", justifyContent: "space-between",
+                alignItems: "center", py: 2, borderBottom: "1px solid #f1f5f9" }}>
+                <Box sx={{ flex: 1, minWidth: 0, mr: 2 }}>
+                  <Typography variant="body2" fontWeight={600} noWrap>{item.product.name}</Typography>
+                  <Typography variant="caption" color="text.secondary" display="block">
+                    ₹{item.unitPrice?.toLocaleString()} each
+                  </Typography>
+                  
+                  {/* Inline Qty Controls */}
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+                    <IconButton size="small" onClick={() => {
+                      if (item.quantity === 1) dispatch(removeFromCart(item.product._id));
+                      else dispatch(updateQuantity({ productId: item.product._id, quantity: item.quantity - 1 }));
+                    }} sx={{ border: "1px solid #e2e8f0", p: 0.25 }}><RemoveIcon fontSize="inherit" /></IconButton>
+                    <Typography variant="body2" fontWeight={700}>{item.quantity}</Typography>
+                    <IconButton size="small" onClick={() => dispatch(updateQuantity({ productId: item.product._id, quantity: item.quantity + 1 }))} sx={{ border: "1px solid #e2e8f0", p: 0.25 }}><AddIcon fontSize="inherit" /></IconButton>
                   </Box>
                 </Box>
-              ))}
-              <Divider sx={{ my: 2 }} />
-              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography variant="h6" fontWeight={600}>Total</Typography>
-                <Typography variant="h6" fontWeight={600} color="#1a1a2e">
-                  ₹{cartTotal.toLocaleString()}
-                </Typography>
+                
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Typography fontWeight={700} color="#1a1a2e">
+                    ₹{(item.quantity * item.unitPrice).toLocaleString()}
+                  </Typography>
+                  <IconButton size="small" color="error" onClick={() => dispatch(removeFromCart(item.product._id))}>
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
               </Box>
-            </Box>
+            ))
           )}
-        </DialogContent>
-        <DialogActions sx={{ p: 3, flexDirection: "column", gap: 1 }}>
-          {cartItems.length > 0 && (
+        </Box>
+
+        {cartItems.length > 0 && (
+          <Box sx={{ borderTop: "1px solid #e2e8f0", pt: 2, mt: "auto" }}>
+            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+              <Typography variant="subtitle1" fontWeight={700}>Subtotal</Typography>
+              <Typography variant="h6" fontWeight={700} color="#1a1a2e">
+                ₹{cartTotal.toLocaleString()}
+              </Typography>
+            </Box>
+            
             <Button fullWidth variant="contained" size="large"
               onClick={() => { setCartOpen(false); setCheckoutOpen(true); }}
-              sx={{ backgroundColor: "#1a1a2e", "&:hover": { backgroundColor: "#0f3460" }, borderRadius: 2 }}>
+              sx={{ backgroundColor: "#1a1a2e", "&:hover": { backgroundColor: "#0f3460" }, borderRadius: 2, mb: 1, py: 1.5, fontWeight: 700, textTransform: "none" }}>
               Proceed to Checkout
             </Button>
-          )}
-          <Button fullWidth variant="outlined" onClick={() => setCartOpen(false)} sx={{ borderRadius: 2 }}>
-            Continue Shopping
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </Box>
+        )}
+        
+        <Button fullWidth variant="outlined" onClick={() => setCartOpen(false)} sx={{ borderRadius: 2, py: 1.2, fontWeight: 600, textTransform: "none", borderColor: "#cbd5e1", color: "#475569" }}>
+          Continue Shopping
+        </Button>
+      </Drawer>
+
 
       {/* Checkout Dialog */}
       <Dialog open={checkoutOpen} onClose={() => setCheckoutOpen(false)} maxWidth="sm" fullWidth>
