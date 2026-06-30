@@ -19,6 +19,7 @@ const Layout = ({ children }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchVal, setSearchVal] = useState("");
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
@@ -146,6 +147,20 @@ const Layout = ({ children }) => {
               <input
                 type="text"
                 placeholder="Search products, orders, SKU, tracking..."
+                value={searchVal}
+                onChange={(e) => setSearchVal(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const roleTarget = {
+                      admin: "/admin/products",
+                      warehouse_manager: "/warehouse/products",
+                      supplier: "/supplier/products",
+                      retailer: "/retailer/products",
+                    };
+                    const base = roleTarget[user?.role] || "/";
+                    navigate(`${base}?search=${encodeURIComponent(searchVal)}`);
+                  }
+                }}
                 style={{
                   border: "none",
                   outline: "none",

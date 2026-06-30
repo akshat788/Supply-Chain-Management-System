@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Layout from "../../components/Layout";
 import API from "../../api/axios";
 import { useDispatch, useSelector } from "react-redux";
@@ -32,6 +33,9 @@ const categoryColors = {
 };
 
 const RetailerProducts = () => {
+  const [searchParams] = useSearchParams();
+  const querySearch = searchParams.get("search") || "";
+
   const dispatch = useDispatch();
   const cartItems = useSelector(state => state.cart.items);
   const [products, setProducts] = useState([]);
@@ -40,7 +44,11 @@ const RetailerProducts = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(querySearch);
+
+  useEffect(() => {
+    setSearch(querySearch);
+  }, [querySearch]);
   const [category, setCategory] = useState("All");
   const [sort, setSort] = useState("default");
   const [cartOpen, setCartOpen] = useState(false);

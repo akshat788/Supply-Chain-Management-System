@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Layout from "../../components/Layout";
 import API from "../../api/axios";
 import {
@@ -14,13 +15,20 @@ import WarningIcon from "@mui/icons-material/Warning";
 const categories = ["All", "Electronics", "Fashion", "Food", "Pharmaceutical", "Furniture", "Other"];
 
 const WarehouseProducts = () => {
+  const [searchParams] = useSearchParams();
+  const querySearch = searchParams.get("search") || "";
+
   const [products, setProducts] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(querySearch);
   const [categoryFilter, setCategoryFilter] = useState("All");
+
+  useEffect(() => {
+    setSearch(querySearch);
+  }, [querySearch]);
 
   useEffect(() => {
     const fetchData = async () => {

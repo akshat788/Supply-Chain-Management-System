@@ -274,9 +274,9 @@ const AdminDashboard = () => {
                           <Typography variant="body2" fontWeight={600}>{order.orderNumber}</Typography>
                           <Typography variant="caption" color="text.secondary">{order.retailer?.name || "Unknown"}</Typography>
                         </Box>
-                        <Box sx={{ textAlign: "right" }}>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                           <Chip label={order.status} size="small" color={getStatusColor(order.status)} />
-                          <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 0.5, fontWeight: 500 }}>₹{order.totalAmount?.toLocaleString()}</Typography>
+                          <Typography variant="body2" fontWeight={600} color="#0f172a">₹{order.totalAmount?.toLocaleString()}</Typography>
                         </Box>
                       </Box>
                     ))
