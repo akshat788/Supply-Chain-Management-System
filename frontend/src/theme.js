@@ -4,14 +4,14 @@ const theme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#1e1b4b", // deep indigo-950
-      light: "#312e81",
-      dark: "#0f0e36",
+      main: "#0f172a", // deep slate-900
+      light: "#1e293b",
+      dark: "#020617",
     },
     secondary: {
-      main: "#4f46e5", // indigo-600
-      light: "#6366f1",
-      dark: "#3730a3",
+      main: "#ea580c", // orange-600 (highlight)
+      light: "#f97316",
+      dark: "#c2410c",
     },
     success: {
       main: "#10b981", // emerald-500
@@ -85,7 +85,7 @@ const theme = createTheme({
           transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
           boxShadow: "none",
           "&:hover": {
-            boxShadow: "0 4px 12px rgba(79, 70, 229, 0.15)",
+            boxShadow: "0 4px 12px rgba(234, 88, 12, 0.15)",
           },
         },
       },

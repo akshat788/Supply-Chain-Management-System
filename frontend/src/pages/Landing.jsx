@@ -118,7 +118,7 @@ const Landing = () => {
         boxShadow: scrolled ? "0 4px 20px -2px rgba(15, 23, 42, 0.05)" : "none"
       }}>
         <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => scrollToSection("hero")}>
-          <img src={logo} alt="SupplySync" style={{ height: 48, borderRadius: "6px" }} />
+          <img src={logo} alt="SupplySync" style={{ height: 56, borderRadius: "6px" }} />
         </div>
 
         {/* Menu Links */}
@@ -217,10 +217,11 @@ const Landing = () => {
           {/* Right Image illustration */}
           <div style={{ display: "flex", justifyContent: "center" }}>
             <img src={logo} alt="SupplySync Logo" className="hero-img-animation" style={{
-              maxWidth: "80%",
+              maxWidth: "350px",
+              width: "100%",
               height: "auto",
               borderRadius: 20,
-              boxShadow: "0 20px 40px -10px rgba(15, 23, 42, 0.1)",
+              boxShadow: "0 25px 50px -12px rgba(15, 23, 42, 0.12)",
               border: "1px solid rgba(226, 232, 240, 0.8)"
             }} />
           </div>
@@ -349,9 +350,9 @@ const Landing = () => {
       }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 40, marginBottom: 48 }}>
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, color: "#ffffff", marginBottom: 20 }}>
-              <img src={logo} alt="SupplySync" style={{ height: 44, backgroundColor: "#ffffff", padding: "4px", borderRadius: "6px" }} />
-              <span style={{ fontWeight: 800, fontSize: 18, letterSpacing: "-0.5px" }}>SupplySync</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, color: "#ffffff", marginBottom: 20 }}>
+              <img src={logo} alt="SupplySync" style={{ height: 52, backgroundColor: "#ffffff", padding: "6px", borderRadius: "8px" }} />
+              <span style={{ fontWeight: 800, fontSize: 20, letterSpacing: "-0.5px" }}>SupplySync</span>
             </div>
             <p style={{ fontSize: 13, lineHeight: 1.6, color: "#64748b" }}>
               Unified synchronization platform powering global merchants, warehouse hubs, and verified suppliers.

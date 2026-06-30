@@ -73,7 +73,7 @@ const Login = () => {
         <CardContent sx={{ p: { xs: 3.5, sm: 4.5 } }}>
           {/* Header */}
           <Box sx={{ textAlign: "center", mb: 4 }}>
-            <img src={logo} alt="SupplySync Logo" style={{ height: 64, marginBottom: 16, borderRadius: "6px" }} />
+            <img src={logo} alt="SupplySync Logo" style={{ height: 110, marginBottom: 16, borderRadius: "10px" }} />
             <Typography variant="h5" fontWeight={900} color="#0f172a" sx={{ fontFamily: "'Outfit', sans-serif", letterSpacing: "-0.5px" }}>
               Welcome back
             </Typography>

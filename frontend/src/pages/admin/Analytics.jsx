@@ -148,7 +148,7 @@ const Analytics = () => {
           { label: "Inventory Value", value: `₹${(dashboard?.financials?.totalInventoryValue || 0).toLocaleString()}`, color: "#06b6d4" },
           { label: "Total Orders", value: dashboard?.counts?.totalOrders || 0, color: "#4f46e5" },
         ].map(item => (
-          <Grid item xs={12} sm={6} lg={3} key={item.label}>
+          <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={item.label}>
             <Card sx={{ textAlign: "center" }}>
               <CardContent sx={{ py: 3 }}>
                 <Typography variant="h4" fontWeight="bold" color={item.color}>{item.value}</Typography>
@@ -161,7 +161,7 @@ const Analytics = () => {
 
       <Grid container spacing={3}>
         {/* Revenue Trend Line Chart */}
-        <Grid item xs={12} lg={8}>
+        <Grid size={{ xs: 12, lg: 8 }}>
           <Card sx={{ height: "100%" }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} mb={2}>Revenue Trend (Last 6 Months)</Typography>
@@ -175,7 +175,7 @@ const Analytics = () => {
         </Grid>
 
         {/* Order Status Pie */}
-        <Grid item xs={12} md={6} lg={4}>
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <Card sx={{ height: "100%" }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} mb={2}>Order Status</Typography>
@@ -191,7 +191,7 @@ const Analytics = () => {
         </Grid>
 
         {/* Monthly Orders Bar */}
-        <Grid item xs={12} md={6} lg={6}>
+        <Grid size={{ xs: 12, md: 6, lg: 6 }}>
           <Card>
             <CardContent>
               <Typography variant="h6" fontWeight={600} mb={2}>Monthly Orders</Typography>
@@ -205,7 +205,7 @@ const Analytics = () => {
         </Grid>
 
         {/* Supplier Performance Bar */}
-        <Grid item xs={12} md={6} lg={6}>
+        <Grid size={{ xs: 12, md: 6, lg: 6 }}>
           <Card>
             <CardContent>
               <Typography variant="h6" fontWeight={600} mb={2}>Supplier Performance</Typography>
@@ -219,7 +219,7 @@ const Analytics = () => {
         </Grid>
 
         {/* Inventory by Category Bar */}
-        <Grid item xs={12} lg={8}>
+        <Grid size={{ xs: 12, lg: 8 }}>
           <Card sx={{ height: "100%" }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} mb={2}>Inventory by Category</Typography>
@@ -233,7 +233,7 @@ const Analytics = () => {
         </Grid>
 
         {/* Inventory Distribution Pie */}
-        <Grid item xs={12} md={6} lg={4}>
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <Card sx={{ height: "100%" }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} mb={2}>Inventory Distribution</Typography>

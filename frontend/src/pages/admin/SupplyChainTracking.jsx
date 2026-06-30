@@ -151,22 +151,22 @@ const SupplyChainTracking = () => {
           <Card sx={{ borderRadius: 3, boxShadow: "0 2px 12px rgba(0,0,0,0.08)", mb: 3 }}>
             <CardContent>
               <Grid container spacing={3}>
-                <Grid item xs={12} md={3}>
+                <Grid size={{ xs: 12, md: 3 }}>
                   <Typography variant="caption" color="text.secondary">Product</Typography>
                   <Typography variant="h6" fontWeight={600}>{trackingData.product?.name}</Typography>
                   <Chip label={trackingData.product?.sku} size="small" sx={{ mt: 0.5 }} />
                 </Grid>
-                <Grid item xs={12} md={3}>
+                <Grid size={{ xs: 12, md: 3 }}>
                   <Typography variant="caption" color="text.secondary">Category</Typography>
                   <Typography variant="body1" fontWeight={500}>{trackingData.product?.category}</Typography>
                 </Grid>
-                <Grid item xs={12} md={3}>
+                <Grid size={{ xs: 12, md: 3 }}>
                   <Typography variant="caption" color="text.secondary">Current Stock</Typography>
                   <Typography variant="body1" fontWeight={500}>
                     {trackingData.inventory ? `${trackingData.inventory.availableStock} units` : "Not in inventory"}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} md={3}>
+                <Grid size={{ xs: 12, md: 3 }}>
                   <Typography variant="caption" color="text.secondary">Lifecycle Stage</Typography>
                   <Box sx={{ mt: 0.5 }}>
                     <Chip

@@ -3,11 +3,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/authSlice";
 import { getCleanName } from "../utils/sanitize";
-import logo from "../assets/logo.png";
+import logo from "../assets/logo.jpg";
 import {
   List, ListItem, ListItemButton, ListItemIcon,
   ListItemText, Typography, Box, Divider, Avatar,
-  useMediaQuery, useTheme,
+  useMediaQuery, useTheme, Button,
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
@@ -75,24 +75,24 @@ const Sidebar = ({ onClose }) => {
   return (
     <Box sx={{
       width: 240, height: "100vh",
-      background: "linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%)",
+      background: "#0f172a",
       color: "#fff", display: "flex", flexDirection: "column",
       borderRight: "1px solid rgba(255, 255, 255, 0.08)",
     }}>
       {/* Logo */}
-      <Box sx={{ p: 2.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 1, borderBottom: "1px solid rgba(255, 255, 255, 0.08)" }}>
-        <img src={logo} alt="SupplySync" style={{ height: 28, filter: "drop-shadow(0 0 6px rgba(99,102,241,0.4))" }} />
+      <Box sx={{ p: 2.5, display: "flex", alignItems: "center", justifyContent: "flex-start", gap: 1.5, borderBottom: "1px solid rgba(255, 255, 255, 0.08)" }}>
+        <img src={logo} alt="SupplySync" style={{ height: 38, backgroundColor: "#ffffff", padding: "3px", borderRadius: "6px" }} />
         <Box sx={{ textAlign: "left" }}>
-          <Typography variant="h6" fontWeight="bold" color="secondary.light" sx={{ fontFamily: "'Outfit', sans-serif", letterSpacing: "0.5px", lineHeight: 1.2 }}>
+          <Typography variant="h6" fontWeight="bold" color="#ffffff" sx={{ fontFamily: "'Outfit', sans-serif", letterSpacing: "0.5px", lineHeight: 1.2, fontSize: 16 }}>
             SupplySync
           </Typography>
-          <Typography variant="caption" color="rgba(255, 255, 255, 0.5)" sx={{ display: "block", fontSize: "10px" }}>Supply Made Easy</Typography>
+          <Typography variant="caption" color="rgba(255, 255, 255, 0.4)" sx={{ display: "block", fontSize: "10px" }}>Supply Made Easy</Typography>
         </Box>
       </Box>
 
       {/* User Info */}
       <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 1.5, borderBottom: "1px solid rgba(255, 255, 255, 0.08)" }}>
-        <Avatar sx={{ bgcolor: "secondary.main", color: "#fff", width: 38, height: 38, fontSize: 15, fontWeight: "bold" }}>
+        <Avatar sx={{ bgcolor: "#ea580c", color: "#fff", width: 38, height: 38, fontSize: 15, fontWeight: "bold" }}>
           {getCleanName(user)?.charAt(0).toUpperCase()}
         </Avatar>
         <Box sx={{ minWidth: 0, flexGrow: 1 }}>
@@ -105,40 +105,88 @@ const Sidebar = ({ onClose }) => {
         </Box>
       </Box>
 
-      {/* Menu Items */}
-      <List sx={{ flexGrow: 1, pt: 2, px: 1, overflowY: "auto" }}>
-        {items.map(item => {
-          const isActive = location.pathname === item.path;
-          return (
-            <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
-              <ListItemButton onClick={() => handleNavigate(item.path)}
+      {/* Menu Items Container */}
+      <Box sx={{ flexGrow: 1, minHeight: 0, overflowY: "auto", px: 1, pt: 2 }}>
+        <List sx={{ p: 0 }}>
+          {items.map(item => {
+            const isActive = location.pathname === item.path;
+            return (
+              <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
+                <ListItemButton onClick={() => handleNavigate(item.path)}
+                  sx={{
+                    borderRadius: "8px",
+                    py: 1, px: 1.5,
+                    backgroundColor: isActive ? "rgba(234, 88, 12, 0.12)" : "transparent",
+                    borderLeft: isActive ? "3px solid #ea580c" : "3px solid transparent",
+                    transition: "all 0.2s ease",
+                    "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.05)" },
+                  }}>
+                  <ListItemIcon sx={{ color: isActive ? "#ea580c" : "rgba(255, 255, 255, 0.5)", minWidth: 32 }}>
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText primary={item.text}
+                    primaryTypographyProps={{
+                      fontSize: 13.5,
+                      color: isActive ? "#ea580c" : "rgba(255, 255, 255, 0.8)",
+                      fontWeight: isActive ? 600 : 400,
+                    }} />
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
+        </List>
+      </Box>
+
+      {/* Bottom CTA Card */}
+      {user?.role === "admin" && (
+        <Box sx={{ px: 2, pb: 2, mt: 2 }}>
+          <Box sx={{
+            backgroundColor: "#1e293b",
+            borderRadius: "12px",
+            p: 2,
+            border: "1px solid rgba(255, 255, 255, 0.05)",
+            textAlign: "left",
+            position: "relative",
+            overflow: "hidden"
+          }}>
+            <Typography variant="body2" fontWeight={700} color="#ffffff" mb={0.5} sx={{ fontSize: "12px", lineHeight: 1.3 }}>
+              Deliver faster with real-time tracking
+            </Typography>
+            <Typography variant="caption" color="rgba(255, 255, 255, 0.4)" display="block" sx={{ fontSize: "10px", lineHeight: 1.2, mb: 1.5 }}>
+              Monitor transit status & verify dispatch times.
+            </Typography>
+            <Box sx={{ display: "block" }}>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() => handleNavigate("/admin/tracking")}
                 sx={{
-                  borderRadius: "8px",
-                  py: 1, px: 1.5,
-                  backgroundColor: isActive ? "rgba(99, 102, 241, 0.15)" : "transparent",
-                  borderLeft: isActive ? "3px solid #818cf8" : "3px solid transparent",
-                  transition: "all 0.2s ease",
-                  "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.05)" },
-                }}>
-                <ListItemIcon sx={{ color: isActive ? "#a5b4fc" : "rgba(255, 255, 255, 0.5)", minWidth: 32 }}>
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText primary={item.text}
-                  primaryTypographyProps={{
-                    fontSize: 13.5,
-                    color: isActive ? "#a5b4fc" : "rgba(255, 255, 255, 0.8)",
-                    fontWeight: isActive ? 600 : 400,
-                  }} />
-              </ListItemButton>
-            </ListItem>
-          );
-        })}
-      </List>
+                  backgroundColor: "#ffffff",
+                  color: "#0f172a",
+                  fontWeight: 700,
+                  fontSize: "10.5px",
+                  py: 0.5,
+                  px: 1.5,
+                  borderRadius: "6px",
+                  textTransform: "none",
+                  boxShadow: "none",
+                  "&:hover": {
+                    backgroundColor: "#f1f5f9",
+                    boxShadow: "none"
+                  }
+                }}
+              >
+                Track Now →
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      )}
 
       <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.08)" }} />
 
       {/* Logout */}
-      <List sx={{ px: 1, py: 1.5 }}>
+      <List sx={{ px: 1, py: 1 }}>
         <ListItem disablePadding>
           <ListItemButton onClick={handleLogout}
             sx={{ borderRadius: "8px", py: 1, px: 1.5, "&:hover": { backgroundColor: "rgba(239, 68, 68, 0.15)" } }}>

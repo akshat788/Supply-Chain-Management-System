@@ -16,19 +16,51 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import CategoryIcon from "@mui/icons-material/Category";
 
-const StatCard = ({ title, value, icon, color, subtitle }) => (
-  <Card sx={{ height: "100%" }}>
+const StatCard = ({ title, value, icon, color, subtitle, trend }) => (
+  <Card sx={{
+    height: "100%",
+    border: "1px solid #e2e8f0",
+    boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.02)",
+    borderRadius: "16px",
+    transition: "transform 0.2s, box-shadow 0.2s",
+    "&:hover": {
+      transform: "translateY(-2px)",
+      boxShadow: "0 12px 20px -4px rgba(15, 23, 42, 0.04)"
+    }
+  }}>
     <CardContent sx={{ p: 3 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <Box>
-          <Typography variant="body2" color="text.secondary" mb={0.5} fontWeight={500}>{title}</Typography>
-          <Typography variant="h4" fontWeight="bold" sx={{ color: "text.primary" }}>{value}</Typography>
-          {subtitle && <Typography variant="caption" color="text.secondary" display="block" mt={0.5}>{subtitle}</Typography>}
-        </Box>
-        <Box sx={{ p: 1.5, borderRadius: "12px", backgroundColor: `${color}15`, color: color }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+        <Box sx={{ p: 1.2, borderRadius: "10px", backgroundColor: `${color}10`, color: color, display: "flex", alignItems: "center", justifyContent: "center" }}>
           {icon}
         </Box>
+        {trend && (
+          <Box sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.5,
+            px: 1,
+            py: 0.2,
+            borderRadius: "20px",
+            backgroundColor: trend.type === "up" ? "#ecfdf5" : "#fef2f2",
+            color: trend.type === "up" ? "#059669" : "#dc2626",
+            fontSize: "11px",
+            fontWeight: 700
+          }}>
+            {trend.type === "up" ? "↑" : "↓"} {trend.value}
+          </Box>
+        )}
       </Box>
+      <Typography variant="caption" color="text.secondary" display="block" fontWeight={600} sx={{ textTransform: "uppercase", letterSpacing: "0.5px" }}>
+        {title}
+      </Typography>
+      <Typography variant="h4" fontWeight={800} color="#0f172a" sx={{ mt: 0.5, fontFamily: "'Outfit', sans-serif" }}>
+        {value}
+      </Typography>
+      {subtitle && (
+        <Typography variant="caption" color="text.secondary" display="block" mt={0.5} sx={{ fontStyle: "italic" }}>
+          {subtitle}
+        </Typography>
+      )}
     </CardContent>
   </Card>
 );
@@ -113,11 +145,11 @@ const AdminDashboard = () => {
   return (
     <Layout>
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h5" fontWeight="bold" color="text.primary" sx={{ fontFamily: "'Outfit', sans-serif" }}>
-          Welcome back, {getCleanName(user)} 👋
+        <Typography variant="h4" fontWeight={900} color="#0f172a" sx={{ fontFamily: "'Outfit', sans-serif", letterSpacing: "-0.5px" }}>
+          Dashboard
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          Here's what's happening in your supply chain today.
+        <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5, fontWeight: 500 }}>
+          Overview of your logistics & supply chain operations
         </Typography>
       </Box>
 
@@ -128,36 +160,36 @@ const AdminDashboard = () => {
           {/* Stat Cards */}
           <Grid container spacing={3} sx={{ mb: 3 }}>
             <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-              <StatCard title="Total Suppliers" value={stats.counts.totalSuppliers} icon={<LocalShippingIcon />} color="#06b6d4" />
+              <StatCard title="Total Suppliers" value={stats.counts.totalSuppliers} icon={<LocalShippingIcon />} color="#ea580c" trend={{ type: "up", value: "8% vs last month" }} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-              <StatCard title="Total Products" value={stats.counts.totalProducts} icon={<InventoryIcon />} color="#4f46e5" />
+              <StatCard title="Total Products" value={stats.counts.totalProducts} icon={<InventoryIcon />} color="#0f172a" trend={{ type: "up", value: "12% vs last month" }} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-              <StatCard title="Total Orders" value={stats.counts.totalOrders} icon={<ShoppingCartIcon />} color="#10b981" />
+              <StatCard title="Total Orders" value={stats.counts.totalOrders} icon={<ShoppingCartIcon />} color="#10b981" trend={{ type: "up", value: "15% vs last week" }} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-              <StatCard title="Low Stock Items" value={stats.counts.lowStockItems} icon={<WarningIcon />} color="#ef4444" subtitle="Needs attention" />
+              <StatCard title="Low Stock Items" value={stats.counts.lowStockItems} icon={<WarningIcon />} color="#ef4444" trend={{ type: "down", value: "4% reduction" }} subtitle="Needs attention" />
             </Grid>
           </Grid>
 
           {/* Financials */}
           <Grid container spacing={3} sx={{ mb: 3 }}>
-            <Grid item xs={12} sm={6} lg={4}>
-              <StatCard title="Total Revenue" icon={<AttachMoneyIcon />} color="#10b981" value={`₹${stats.financials.totalRevenue.toLocaleString()}`} subtitle="From delivered orders" />
+            <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+              <StatCard title="Total Revenue" icon={<AttachMoneyIcon />} color="#10b981" value={`₹${stats.financials.totalRevenue.toLocaleString()}`} trend={{ type: "up", value: "18% vs last week" }} subtitle="From delivered orders" />
             </Grid>
-            <Grid item xs={12} sm={6} lg={4}>
-              <StatCard title="Procurement Cost" icon={<AttachMoneyIcon />} color="#f59e0b" value={`₹${stats.financials.totalProcurementCost.toLocaleString()}`} subtitle="Total purchase orders" />
+            <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+              <StatCard title="Procurement Cost" icon={<AttachMoneyIcon />} color="#ea580c" value={`₹${stats.financials.totalProcurementCost.toLocaleString()}`} trend={{ type: "down", value: "2% savings" }} subtitle="Total purchase orders" />
             </Grid>
-            <Grid item xs={12} sm={12} lg={4}>
-              <StatCard title="Inventory Value" icon={<AttachMoneyIcon />} color="#06b6d4" value={`₹${stats.financials.totalInventoryValue.toLocaleString()}`} subtitle="Current stock value" />
+            <Grid size={{ xs: 12, sm: 12, lg: 4 }}>
+              <StatCard title="Inventory Value" icon={<AttachMoneyIcon />} color="#0f172a" value={`₹${stats.financials.totalInventoryValue.toLocaleString()}`} trend={{ type: "up", value: "6% appreciation" }} subtitle="Current stock value" />
             </Grid>
           </Grid>
 
           <Grid container spacing={3} sx={{ mb: 3 }}>
             {/* Order Status Overview */}
-            <Grid item xs={12} md={6} lg={4}>
-              <Card sx={{ height: "100%" }}>
+            <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+              <Card sx={{ height: "100%", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.02)" }}>
                 <CardContent>
                   <Typography variant="h6" fontWeight={600} mb={2}>Order Status Overview</Typography>
                   {stats.orderStatusBreakdown.length === 0 ? (
@@ -175,8 +207,8 @@ const AdminDashboard = () => {
             </Grid>
 
             {/* Inventory Health */}
-            <Grid item xs={12} md={6} lg={4}>
-              <Card sx={{ height: "100%" }}>
+            <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+              <Card sx={{ height: "100%", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.02)" }}>
                 <CardContent>
                   <Typography variant="h6" fontWeight={600} mb={2}>Inventory Health</Typography>
                   <Box sx={{ mb: 3 }}>
@@ -202,8 +234,8 @@ const AdminDashboard = () => {
             </Grid>
 
             {/* Recent Activity Feed */}
-            <Grid item xs={12} md={12} lg={4}>
-              <Card sx={{ height: "100%" }}>
+            <Grid size={{ xs: 12, md: 12, lg: 4 }}>
+              <Card sx={{ height: "100%", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.02)" }}>
                 <CardContent>
                   <Typography variant="h6" fontWeight={600} mb={2}>Recent Activity</Typography>
                   {[
@@ -229,8 +261,8 @@ const AdminDashboard = () => {
 
           {/* Recent Orders + Top Suppliers */}
           <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <Card sx={{ height: "100%" }}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Card sx={{ height: "100%", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.02)" }}>
                 <CardContent>
                   <Typography variant="h6" fontWeight={600} mb={2}>Recent Orders</Typography>
                   {stats.recentOrders.length === 0 ? (
@@ -253,8 +285,8 @@ const AdminDashboard = () => {
               </Card>
             </Grid>
 
-            <Grid item xs={12} md={6}>
-              <Card sx={{ height: "100%" }}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Card sx={{ height: "100%", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.02)" }}>
                 <CardContent>
                   <Typography variant="h6" fontWeight={600} mb={2}>Top Suppliers</Typography>
                   {stats.topSuppliers.length === 0 ? (

@@ -199,7 +199,7 @@ const Orders = () => {
               </Card>
 
               <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Typography variant="subtitle2" fontWeight={600} mb={1}>Order Info</Typography>
                   {[
                     { label: "Order Number", value: selectedOrder.orderNumber },
@@ -215,7 +215,7 @@ const Orders = () => {
                     </Box>
                   ))}
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Typography variant="subtitle2" fontWeight={600} mb={1}>Retailer Info</Typography>
                   {[
                     { label: "Name", value: selectedOrder.retailer?.name },

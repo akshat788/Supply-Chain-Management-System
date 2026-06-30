@@ -109,7 +109,7 @@ const Users = () => {
           { role: "warehouse_manager", label: "Warehouse", color: "#4fc3f7" },
           { role: "retailer", label: "Retailers", color: "#66bb6a" },
         ].map(item => (
-          <Grid item xs={6} md={3} key={item.role}>
+          <Grid size={{ xs: 6, md: 3 }} key={item.role}>
             <Card sx={{ borderRadius: 3, boxShadow: "0 2px 12px rgba(0,0,0,0.08)", textAlign: "center" }}>
               <CardContent sx={{ p: 2 }}>
                 <Typography variant="h4" fontWeight="bold" color={item.color}>
@@ -192,22 +192,22 @@ const Users = () => {
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField label="Full Name *" size="small" fullWidth
                   value={createForm.name}
                   onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField label="Email *" size="small" fullWidth type="email"
                   value={createForm.email}
                   onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField label="Password *" size="small" fullWidth type="password"
                   value={createForm.password}
                   onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl size="small" fullWidth>
                   <InputLabel>Role *</InputLabel>
                   <Select
@@ -227,12 +227,12 @@ const Users = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField label="Organization" size="small" fullWidth
                   value={createForm.organization}
                   onChange={(e) => setCreateForm({ ...createForm, organization: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField label="Phone" size="small" fullWidth
                   value={createForm.phone}
                   onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} />
