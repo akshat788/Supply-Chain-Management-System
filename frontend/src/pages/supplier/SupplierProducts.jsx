@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Layout from "../../components/Layout";
 import API from "../../api/axios";
 import {
@@ -15,6 +16,9 @@ import SearchIcon from "@mui/icons-material/Search";
 const categories = ["Electronics", "Fashion", "Food", "Pharmaceutical", "Furniture", "Other"];
 
 const SupplierProducts = () => {
+  const [searchParams] = useSearchParams();
+  const querySearch = searchParams.get("search") || "";
+
   const [products, setProducts] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -23,7 +27,12 @@ const SupplierProducts = () => {
   const [success, setSuccess] = useState("");
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState(null);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(querySearch);
+
+  useEffect(() => {
+    setSearch(querySearch);
+  }, [querySearch]);
+
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [form, setForm] = useState({
     name: "", category: "Electronics", description: "",

@@ -179,28 +179,53 @@ const WarehouseDashboard = () => {
 
         {/* Warehouse Activity Feed */}
         <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-          <Card sx={{ height: "100%" }}>
+          <Card sx={{ height: "100%", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.02)" }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} mb={2}>Warehouse Activity</Typography>
               {transactions.length === 0 ? (
                 <Typography color="text.secondary">No activity yet.</Typography>
               ) : (
-                transactions.slice(0, 6).map((tx, i) => (
-                  <Box key={i} sx={{ display: "flex", alignItems: "flex-start", gap: 2, py: 1, borderBottom: "1px solid #f0f0f0" }}>
-                    <Box sx={{ width: 8, height: 8, borderRadius: "50%", mt: 0.8, flexShrink: 0,
-                      backgroundColor: tx.type === "IN" ? "#66bb6a" : "#ef5350" }} />
-                    <Box sx={{ flex: 1 }}>
-                      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                        <Typography variant="body2" fontWeight={500}>{tx.action}</Typography>
-                        <Chip label={tx.type === "IN" ? `+${tx.quantity}` : `-${tx.quantity}`}
-                          size="small" color={tx.type === "IN" ? "success" : "error"} />
-                      </Box>
-                      <Typography variant="caption" color="text.secondary">
-                        {tx.product?.name} • {tx.reference && `Ref: ${tx.reference} •`} {new Date(tx.createdAt).toLocaleTimeString()}
-                      </Typography>
-                    </Box>
-                  </Box>
-                ))
+                <TableContainer component={Paper} elevation={0} sx={{ backgroundColor: "transparent" }}>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 700, pl: 0, borderBottom: "2px solid #e2e8f0" }}>Activity / Product</TableCell>
+                        <TableCell sx={{ fontWeight: 700, borderBottom: "2px solid #e2e8f0" }}>Type</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 700, pr: 0, borderBottom: "2px solid #e2e8f0" }}>Quantity</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {transactions.slice(0, 6).map((tx, i) => (
+                        <TableRow key={i} hover sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                          <TableCell sx={{ borderBottom: "1px solid #f1f5f9", pl: 0, py: 1 }}>
+                            <Typography variant="body2" fontWeight={700} color="#0f172a">
+                              {tx.action}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+                              {tx.product?.name} {tx.reference && `• Ref: ${tx.reference}`}
+                            </Typography>
+                          </TableCell>
+                          <TableCell sx={{ borderBottom: "1px solid #f1f5f9", py: 1 }}>
+                            <Chip
+                              label={tx.type === "IN" ? "Stock In" : "Stock Out"}
+                              size="small"
+                              color={tx.type === "IN" ? "success" : "error"}
+                              sx={{ fontWeight: 600, height: 20, fontSize: "11px" }}
+                            />
+                          </TableCell>
+                          <TableCell align="right" sx={{ borderBottom: "1px solid #f1f5f9", pr: 0, py: 1 }}>
+                            <Typography variant="body2" fontWeight={700} color={tx.type === "IN" ? "#10b981" : "#ef4444"}>
+                              {tx.type === "IN" ? `+${tx.quantity}` : `-${tx.quantity}`}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontSize: "10.5px" }}>
+                              {new Date(tx.createdAt).toLocaleTimeString()}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               )}
             </CardContent>
           </Card>
@@ -210,41 +235,77 @@ const WarehouseDashboard = () => {
       {/* Recent Orders + Recent POs */}
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ borderRadius: 3, boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
+          <Card sx={{ borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.02)" }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} mb={2}>Recent Orders</Typography>
               {stats?.recentOrders?.length === 0 ? (
                 <Typography color="text.secondary">No orders yet.</Typography>
               ) : (
-                stats?.recentOrders?.map(order => (
-                  <Box key={order._id} sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", py: 1, borderBottom: "1px solid #f0f0f0" }}>
-                    <Box>
-                      <Typography variant="body2" fontWeight={500}>{order.orderNumber}</Typography>
-                      <Typography variant="caption" color="text.secondary">{order.retailer?.name}</Typography>
-                    </Box>
-                    <Chip label={order.status} size="small" color={statusColors[order.status] || "default"} />
-                  </Box>
-                ))
+                <TableContainer component={Paper} elevation={0} sx={{ backgroundColor: "transparent" }}>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 700, pl: 0, borderBottom: "2px solid #e2e8f0" }}>Order Details</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 700, pr: 0, borderBottom: "2px solid #e2e8f0" }}>Status</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {stats?.recentOrders?.slice(0, 5).map(order => (
+                        <TableRow key={order._id} hover sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                          <TableCell sx={{ borderBottom: "1px solid #f1f5f9", pl: 0, py: 1.5 }}>
+                            <Typography variant="body2" fontWeight={700} color="#0f172a">
+                              {order.orderNumber}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+                              {order.retailer?.name || "Unknown"}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="right" sx={{ borderBottom: "1px solid #f1f5f9", pr: 0, py: 1.5 }}>
+                            <Chip label={order.status} size="small" color={statusColors[order.status] || "default"} sx={{ fontWeight: 600 }} />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               )}
             </CardContent>
           </Card>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ borderRadius: 3, boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
+          <Card sx={{ borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.02)" }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} mb={2}>Recent Purchase Orders</Typography>
               {stats?.recentPurchaseOrders?.length === 0 ? (
                 <Typography color="text.secondary">No purchase orders yet.</Typography>
               ) : (
-                stats?.recentPurchaseOrders?.map(po => (
-                  <Box key={po._id} sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", py: 1, borderBottom: "1px solid #f0f0f0" }}>
-                    <Box>
-                      <Typography variant="body2" fontWeight={500}>{po.poNumber}</Typography>
-                      <Typography variant="caption" color="text.secondary">{po.supplier?.name}</Typography>
-                    </Box>
-                    <Chip label={po.status} size="small" color={statusColors[po.status] || "default"} />
-                  </Box>
-                ))
+                <TableContainer component={Paper} elevation={0} sx={{ backgroundColor: "transparent" }}>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 700, pl: 0, borderBottom: "2px solid #e2e8f0" }}>PO Details</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 700, pr: 0, borderBottom: "2px solid #e2e8f0" }}>Status</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {stats?.recentPurchaseOrders?.slice(0, 5).map(po => (
+                        <TableRow key={po._id} hover sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                          <TableCell sx={{ borderBottom: "1px solid #f1f5f9", pl: 0, py: 1.5 }}>
+                            <Typography variant="body2" fontWeight={700} color="#0f172a">
+                              {po.poNumber}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+                              {po.supplier?.name || "Unknown"}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="right" sx={{ borderBottom: "1px solid #f1f5f9", pr: 0, py: 1.5 }}>
+                            <Chip label={po.status} size="small" color={statusColors[po.status] || "default"} sx={{ fontWeight: 600 }} />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               )}
             </CardContent>
           </Card>

@@ -169,21 +169,38 @@ const RetailerDashboard = () => {
 
         {/* Recent Activity */}
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <Card sx={{ height: "100%" }}>
-            <CardContent>
+          <Card sx={{ height: "100%", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.02)" }}>
+            <CardContent sx={{ pb: "16px !important" }}>
               <Typography variant="h6" fontWeight={600} mb={2}>Recent Activity</Typography>
-              {recentActivity.length === 0 ? (
+              {orders.length === 0 ? (
                 <Typography color="text.secondary" variant="body2">No activity yet.</Typography>
               ) : (
-                recentActivity.map((item, i) => (
-                  <Box key={i} sx={{ display: "flex", alignItems: "flex-start", gap: 1.5, py: 1.5, borderBottom: "1px solid #f1f5f9" }}>
-                    <Box sx={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: item.color, mt: 0.8, flexShrink: 0 }} />
-                    <Box sx={{ minWidth: 0, flexGrow: 1 }}>
-                      <Typography variant="body2" noWrap sx={{ textOverflow: "ellipsis", overflow: "hidden" }}>{item.text}</Typography>
-                      <Typography variant="caption" color="text.secondary">{item.time}</Typography>
-                    </Box>
-                  </Box>
-                ))
+                <TableContainer component={Paper} elevation={0} sx={{ maxHeight: 220, overflowY: "auto", backgroundColor: "transparent" }}>
+                  <Table size="small">
+                    <TableBody>
+                      {orders.slice(0, 5).map((order) => (
+                        <TableRow key={order._id} hover sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                          <TableCell sx={{ borderBottom: "1px solid #f1f5f9", pl: 0, py: 1 }}>
+                            <Typography variant="body2" fontWeight={700} color="#0f172a">
+                              Order
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontSize: "10.5px" }} noWrap>
+                              {order.orderNumber}
+                            </Typography>
+                          </TableCell>
+                          <TableCell sx={{ borderBottom: "1px solid #f1f5f9", py: 1 }}>
+                            <Chip label={order.status} size="small" color={statusColors[order.status] || "default"} sx={{ height: 20, fontSize: "11px", fontWeight: 700 }} />
+                          </TableCell>
+                          <TableCell align="right" sx={{ borderBottom: "1px solid #f1f5f9", pr: 0, py: 1 }}>
+                            <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                              {new Date(order.createdAt).toLocaleDateString()}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               )}
             </CardContent>
           </Card>

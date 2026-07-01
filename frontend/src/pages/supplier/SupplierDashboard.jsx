@@ -93,7 +93,17 @@ const SupplierDashboard = () => {
           {/* Stat Cards */}
           <Grid container spacing={3} sx={{ mb: 3 }}>
             <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-              <Card>
+              <Card sx={{
+                height: "100%",
+                border: "1px solid #e2e8f0",
+                boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.02)",
+                borderRadius: "16px",
+                transition: "transform 0.2s, box-shadow 0.2s",
+                "&:hover": {
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 12px 20px -4px rgba(15, 23, 42, 0.04)"
+                }
+              }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <Box sx={{ minWidth: 0 }}>
@@ -110,7 +120,17 @@ const SupplierDashboard = () => {
               </Card>
             </Grid>
             <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-              <Card>
+              <Card sx={{
+                height: "100%",
+                border: "1px solid #e2e8f0",
+                boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.02)",
+                borderRadius: "16px",
+                transition: "transform 0.2s, box-shadow 0.2s",
+                "&:hover": {
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 12px 20px -4px rgba(15, 23, 42, 0.04)"
+                }
+              }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <Box sx={{ minWidth: 0 }}>
@@ -125,7 +145,17 @@ const SupplierDashboard = () => {
               </Card>
             </Grid>
             <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-              <Card>
+              <Card sx={{
+                height: "100%",
+                border: "1px solid #e2e8f0",
+                boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.02)",
+                borderRadius: "16px",
+                transition: "transform 0.2s, box-shadow 0.2s",
+                "&:hover": {
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 12px 20px -4px rgba(15, 23, 42, 0.04)"
+                }
+              }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <Box sx={{ minWidth: 0 }}>
@@ -140,7 +170,17 @@ const SupplierDashboard = () => {
               </Card>
             </Grid>
             <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-              <Card>
+              <Card sx={{
+                height: "100%",
+                border: "1px solid #e2e8f0",
+                boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.02)",
+                borderRadius: "16px",
+                transition: "transform 0.2s, box-shadow 0.2s",
+                "&:hover": {
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 12px 20px -4px rgba(15, 23, 42, 0.04)"
+                }
+              }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <Box sx={{ minWidth: 0 }}>
@@ -159,7 +199,7 @@ const SupplierDashboard = () => {
           <Grid container spacing={3} sx={{ mb: 3 }}>
             {/* Performance Rating */}
             <Grid size={{ xs: 12, md: 5, lg: 4 }}>
-              <Card sx={{ height: "100%" }}>
+              <Card sx={{ height: "100%", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.02)" }}>
                 <CardContent>
                   <Typography variant="h6" fontWeight={600} mb={2}>Performance Rating</Typography>
                   <Box sx={{ textAlign: "center", py: 2 }}>
@@ -193,31 +233,39 @@ const SupplierDashboard = () => {
 
             {/* Recent Purchase Orders */}
             <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-              <Card sx={{ height: "100%" }}>
-                <CardContent>
+              <Card sx={{ height: "100%", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.02)" }}>
+                <CardContent sx={{ pb: "16px !important" }}>
                   <Typography variant="h6" fontWeight={600} mb={2}>Recent Purchase Orders</Typography>
                   {orders.length === 0 ? (
                     <Typography color="text.secondary">No purchase orders yet.</Typography>
                   ) : (
-                    <TableContainer component={Paper} elevation={0}>
+                    <TableContainer component={Paper} elevation={0} sx={{ backgroundColor: "transparent" }}>
                       <Table size="small">
-                        <TableHead sx={{ backgroundColor: "#f8fafc" }}>
+                        <TableHead>
                           <TableRow>
                             {["PO Number", "Items", "Total", "Status", "Date"].map(h => (
-                              <TableCell key={h} sx={{ fontWeight: 600 }}>{h}</TableCell>
+                              <TableCell key={h} sx={{ fontWeight: 700, borderBottom: "2px solid #e2e8f0", pl: h === "PO Number" ? 0 : 2, pr: h === "Date" ? 0 : 2 }}>{h}</TableCell>
                             ))}
                           </TableRow>
                         </TableHead>
                         <TableBody>
                           {orders.slice(0, 5).map(o => (
-                            <TableRow key={o._id} hover>
-                              <TableCell sx={{ fontWeight: 500 }}>{o.poNumber}</TableCell>
-                              <TableCell>{o.items?.length} item(s)</TableCell>
-                              <TableCell>₹{o.totalAmount?.toLocaleString()}</TableCell>
-                              <TableCell>
-                                <Chip label={o.status} size="small" color={statusColors[o.status] || "default"} />
+                            <TableRow key={o._id} hover sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                              <TableCell sx={{ borderBottom: "1px solid #f1f5f9", pl: 0, py: 1.5, fontWeight: 700, color: "#0f172a" }}>
+                                {o.poNumber}
                               </TableCell>
-                              <TableCell>{new Date(o.createdAt).toLocaleDateString()}</TableCell>
+                              <TableCell sx={{ borderBottom: "1px solid #f1f5f9", py: 1.5 }}>
+                                {o.items?.length} item(s)
+                              </TableCell>
+                              <TableCell sx={{ borderBottom: "1px solid #f1f5f9", py: 1.5, fontWeight: 600 }}>
+                                ₹{o.totalAmount?.toLocaleString()}
+                              </TableCell>
+                              <TableCell sx={{ borderBottom: "1px solid #f1f5f9", py: 1.5 }}>
+                                <Chip label={o.status} size="small" color={statusColors[o.status] || "default"} sx={{ fontWeight: 600 }} />
+                              </TableCell>
+                              <TableCell align="right" sx={{ borderBottom: "1px solid #f1f5f9", pr: 0, py: 1.5, color: "text.secondary", fontSize: "12px" }}>
+                                {new Date(o.createdAt).toLocaleDateString()}
+                              </TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
